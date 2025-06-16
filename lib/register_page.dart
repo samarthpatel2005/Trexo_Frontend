@@ -22,15 +22,36 @@ class RegisterPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/trexo_logo.png',
-                    height: 120,
-                  ),
+                  Image.asset('assets/images/trexo_logo.png', height: 120),
                   const SizedBox(height: 40),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Name',
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.7),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       hintText: 'Mobile Number',
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.7),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Email Address',
                       filled: true,
                       fillColor: Colors.white.withOpacity(0.7),
                       border: OutlineInputBorder(
@@ -52,43 +73,35 @@ class RegisterPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Confirm Password',
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.7),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       shape: const StadiumBorder(),
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 60),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 60,
+                      ),
                     ),
                     onPressed: () {
+                      // Navigator.pushNamed(context, '/Homepage');
                       // Registration logic
                       showDialog(
                         context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text("Success"),
-                          content: const Text("Registration Successful!"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context); // Close dialog
-                                Navigator.pop(context); // Go back to login
-                              },
-                              child: const Text("OK"),
+                        builder:
+                            (_) => AlertDialog(
+                              title: const Text("Success"),
+                              content: const Text("Registration Successful!"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Close dialog
+                                    Navigator.pop(context); // Go back to login
+                                  },
+                                  child: const Text("OK"),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
                       );
                     },
                     child: const Text("Register"),

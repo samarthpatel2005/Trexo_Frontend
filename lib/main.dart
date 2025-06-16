@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trexo/register_page.dart';
+import 'package:trexo/screen/Homepage.dart';
 import 'login_page.dart'; // Import your new file
 
 void main() {
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: const LoginPage(), // Start here
       routes: {
-        '/register': (context) => const RegisterPage(), // define this separately
+        '/register':
+            (context) => const RegisterPage(), // define this separately
       },
     );
   }
