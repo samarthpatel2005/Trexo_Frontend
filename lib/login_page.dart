@@ -1,7 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false;
+
+  Future<void> _login() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final url = Uri.parse('https://trexo-backend.onrender.com/api/auth/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      }),
+    );
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // You can store token or user info here
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login successful')),
+      );
+      // Navigate to home/dashboard
+    } else {
+      final error = jsonDecode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error['message'] ?? 'Login failed')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +73,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       hintText: 'Email',
                       filled: true,
@@ -40,6 +86,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Password',
@@ -64,10 +111,10 @@ class LoginPage extends StatelessWidget {
                       shape: const StadiumBorder(),
                       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 60),
                     ),
-                    onPressed: () {
-                      // Login logic
-                    },
-                    child: const Text("Login"),
+                    onPressed: isLoading ? null : _login,
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("Login"),
                   ),
                   const SizedBox(height: 20),
                   Row(
