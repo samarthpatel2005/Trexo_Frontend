@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const String baseUrl = 'http://localhost:5000'; // Use your IP if testing on mobile
+const String baseUrl = 'https://trexo-backend.onrender.com'; // Use your IP if testing on mobile
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
