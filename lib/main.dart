@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:trexo/register_page.dart';
-import 'package:trexo/screen/Homepage.dart';
-import 'login_page.dart'; // Import your new file
+import 'package:trexo/screen/ViewAllScreen.dart';
+import 'package:trexo/screen/about.dart';
+import 'package:trexo/screen/admin_dashboard.dart';
+import 'package:trexo/screen/signup_screen.dart';
+import 'package:trexo/screen/login_screen.dart';
+import 'package:trexo/screen/home_screen.dart';
+import 'package:trexo/screen/profile_page.dart';
+import 'package:trexo/screen/add_vehicle_screen.dart';
+import 'package:trexo/screen/add_property_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,11 +19,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Trexo',
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(), // Start here
+      theme: ThemeData(primarySwatch: Colors.blue),
+
+      // Default screen
+      initialRoute: '/signup',
+
+      // Route definitions
       routes: {
-        '/register':
-            (context) => const RegisterPage(), // define this separately
+        '/signup': (context) => const SignupScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(email: ''), // 👈 Replace with dynamic email in Login
+        '/profile': (context) => const ProfilePage(),
+        '/about': (context) => const AboutPage(),
+        '/admin': (context) => const AdminDashboard(), // ✅ Add this
+        '/add-vehicle': (context) => const AddVehicleScreen(),
+        '/add-property': (context) => const AddPropertyScreen(),
+        '/view-all': (context) => const ViewAllScreen(), 
       },
     );
   }

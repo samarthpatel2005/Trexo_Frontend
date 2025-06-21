@@ -1,79 +1,39 @@
-// import 'package:flutter/material.dart';
-
-// class CustomHeader extends StatelessWidget {
-//   const CustomHeader({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       decoration: const BoxDecoration(
-//         gradient: LinearGradient(
-//           colors: [Color(0xFFd2fbd8), Color(0xFFa5f1cd)],
-//           begin: Alignment.topLeft,
-//           end: Alignment.bottomRight,
-//         ),
-//       ),
-//       child: SafeArea(
-//         child: Scaffold(
-//           backgroundColor: Colors.transparent,
-//           body: Center(
-//             child: SingleChildScrollView(
-//               padding: const EdgeInsets.symmetric(horizontal: 24),
-//               child: Column(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Image.asset('assets/images/trexo_logo.png', height: 120),
-//                   const SizedBox(height: 40),
-//                   // Additional widgets can be added here
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
-import 'package:trexo/screen/profilepage.dart';
 
-class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
-  const CustomHeader({super.key});
+class SimpleHeader extends StatelessWidget implements PreferredSizeWidget {
+  const SimpleHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 2,
-      automaticallyImplyLeading: false,
+      backgroundColor: Colors.blue,
+      elevation: 4,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // App Logo or Name
+          // 👈 Left: Logo and App Name
           Row(
             children: [
-              Image.asset(
-                'assets/images/trexo_logo.png', // Your app logo path
-                height: 100,
-              ),
-              const SizedBox(width: 8),
+              Image.asset('assets/images/logo.png', height: 100),
+              const SizedBox(width: 10),
+              // const Text("MyApp", style: TextStyle(color: Colors.white)),
             ],
           ),
-          // Profile Icon
-          IconButton(
-            icon: CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage(
-                'assets/images/profile_pic.jpg',
-              ), // Your profile picture path
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Profilepage()),
-              );
-            },
-          ),
+
+          // 👉 Right: Navigation Buttons
+          Row(
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/about'),
+                child: const Text("About", style: TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/profile'),
+                child: const Text("Profile", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          )
         ],
       ),
     );
