@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trexo/screen/ViewAllScreen.dart';
+import 'package:trexo/screen/ViewPropertyScreen.dart';
+import 'package:trexo/screen/ViewVehicleScreen.dart';
 import 'package:trexo/screen/about.dart';
 import 'package:trexo/screen/admin_dashboard.dart';
 import 'package:trexo/screen/signup_screen.dart';
@@ -37,6 +39,8 @@ class MyApp extends StatelessWidget {
         '/add-vehicle': (context) => const AddVehicleScreen(),
         '/add-property': (context) => const AddPropertyScreen(),
         '/view-all': (context) => const ViewAllScreen(), 
+        '/view-property': (context) => const ViewPropertyScreen(),
+        '/view-vehicle': (context) => const ViewVehicleScreen(),
       },
     );
   }
