@@ -26,35 +26,23 @@ class AdminService {
     );
   }
 
-  static Future<List<dynamic>> getProperties([String? token]) async {
-  final res = await http.get(
-    Uri.parse('http://127.0.0.1:5000/api/auth/properties'),
-    headers: {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    },
-  );
-  if (res.statusCode == 200) {
-    return jsonDecode(res.body);
-  } else {
-    throw Exception('Failed to load properties');
+  static Future<http.Response> getProperties(String token) async {
+    return await http.get(
+      Uri.parse('$baseUrl/properties'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+  }
+
+  static Future<http.Response> getVehicles(String token) async {
+    return await http.get(
+      Uri.parse('$baseUrl/vehicles'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
   }
 }
-
-static Future<List<dynamic>> getVehicles([String? token]) async {
-  final res = await http.get(
-    Uri.parse('http://127.0.0.1:5000/api/auth/vehicles'),
-    headers: {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    },
-  );
-  if (res.statusCode == 200) {
-    return jsonDecode(res.body);
-  } else {
-    throw Exception('Failed to load vehicles');
-  }
-}
-
-}
-

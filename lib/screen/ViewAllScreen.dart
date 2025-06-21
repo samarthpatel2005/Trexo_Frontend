@@ -1,7 +1,7 @@
-// import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trexo/services/admin_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trexo/widget/InteractiveCard.dart';
 
 class ViewAllScreen extends StatefulWidget {
@@ -29,14 +29,19 @@ class _ViewAllScreenState extends State<ViewAllScreen> with TickerProviderStateM
     final token = prefs.getString('token') ?? '';
 
     try {
-      final propRes = await AdminService.getProperties();
-      final vehRes = await AdminService.getVehicles();
+      final propRes = await AdminService.getProperties(token);
+      final vehRes = await AdminService.getVehicles(token);
 
-      setState(() {
-        properties = propRes;
-        vehicles = vehRes;
-        isLoading = false;
-      });
+      if (propRes.statusCode == 200 && vehRes.statusCode == 200) {
+        setState(() {
+          properties = jsonDecode(propRes.body);
+          vehicles = jsonDecode(vehRes.body);
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+        print("Failed to load data");
+      }
     } catch (e) {
       setState(() => isLoading = false);
       print("Error: $e");
