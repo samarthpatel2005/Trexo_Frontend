@@ -17,6 +17,11 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   final locationCtrl = TextEditingController();
   final descCtrl = TextEditingController();
 
+  // Extra Info Controllers
+  final sizeCtrl = TextEditingController();
+  final roomsCtrl = TextEditingController();
+  final typeCtrl = TextEditingController();
+
   final List<TextEditingController> imageUrlControllers = [];
 
   void addImageUrlField() {
@@ -45,9 +50,16 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
       "price": double.tryParse(priceCtrl.text.trim()) ?? 0,
       "location": locationCtrl.text.trim(),
       "description": descCtrl.text.trim(),
-      "imageUrls": imageUrlControllers.map((ctrl) => ctrl.text.trim()).where((url) => url.isNotEmpty).toList(),
+      "imageUrls": imageUrlControllers
+          .map((ctrl) => ctrl.text.trim())
+          .where((url) => url.isNotEmpty)
+          .toList(),
       "tags": [locationCtrl.text.trim()],
-      "extraInfo": {},
+      "extraInfo": {
+        "size": sizeCtrl.text.trim(),
+        "rooms": roomsCtrl.text.trim(),
+        "type": typeCtrl.text.trim(),
+      },
     };
 
     try {
@@ -55,7 +67,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
 
       if (res.statusCode == 201) {
         Fluttertoast.showToast(msg: '✅ Property added successfully!');
-        Navigator.pop(context); // or reset form
+        Navigator.pop(context);
       } else {
         final err = jsonDecode(res.body);
         Fluttertoast.showToast(msg: '❌ ${err['message'] ?? "Failed to add property"}');
@@ -80,7 +92,16 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
             TextField(controller: locationCtrl, decoration: const InputDecoration(labelText: 'Location')),
             const SizedBox(height: 10),
             TextField(controller: descCtrl, maxLines: 4, decoration: const InputDecoration(labelText: 'Description')),
+            const SizedBox(height: 10),
+
+            // 🔽 Extra Info Fields
+            TextField(controller: sizeCtrl, decoration: const InputDecoration(labelText: 'Size (e.g. 1200 sq.ft)')),
+            const SizedBox(height: 10),
+            TextField(controller: roomsCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Number of Rooms')),
+            const SizedBox(height: 10),
+            TextField(controller: typeCtrl, decoration: const InputDecoration(labelText: 'Property Type (Apartment, Villa, etc)')),
             const SizedBox(height: 20),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

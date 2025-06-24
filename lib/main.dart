@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trexo/screen/VehicleDetailsPage.dart';
 import 'package:trexo/screen/ViewAllScreen.dart';
 import 'package:trexo/screen/ViewPropertyScreen.dart';
 import 'package:trexo/screen/ViewVehicleScreen.dart';
@@ -41,6 +42,10 @@ class MyApp extends StatelessWidget {
         '/view-all': (context) => const ViewAllScreen(), 
         '/view-property': (context) => const ViewPropertyScreen(),
         '/view-vehicle': (context) => const ViewVehicleScreen(),
+        '/vehicle-details': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return VehicleDetailsPage(vehicle: args);
+        },
       },
     );
   }
