@@ -138,7 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               const CircleAvatar(
                                 radius: 50,
                                 backgroundImage: AssetImage(
-                                  'assets/images/logo.png',
+                                  'assets/images/logocopy.png',
                                 ), // Replace with user's image if available
                               ),
                               const SizedBox(height: 16),
