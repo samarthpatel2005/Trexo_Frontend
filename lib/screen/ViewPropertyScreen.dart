@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:trexo/screen/PropertyDetailsPage.dart';
 import 'package:trexo/widget/property_listing_card.dart';
 // import 'package:trexo/widget/InteractiveCard.dart';
 
@@ -77,6 +78,15 @@ class _ViewPropertyScreenState extends State<ViewPropertyScreen> {
                     onDetailsPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Details of ${item['title']}")),
+                      );
+                    },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => PropertyDetailsPage(property: item),
+                        ),
                       );
                     },
                   );
