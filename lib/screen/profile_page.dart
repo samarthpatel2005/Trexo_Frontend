@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:trexo/widget/header.dart';
+// import 'package:trexo/widget/header.dart';
 import '../services/auth_service.dart';
 
 class ProfilePage extends StatefulWidget {

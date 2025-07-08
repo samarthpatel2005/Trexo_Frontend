@@ -24,7 +24,7 @@ class _ViewPropertyScreenState extends State<ViewPropertyScreen> {
 
   Future<void> fetchProperties() async {
     try {
-      final res = await http.get(Uri.parse('http://localhost:5000/api/view/property'));
+      final res = await http.get(Uri.parse('http://13.203.148.184/api/view/property'));
       if (res.statusCode == 200) {
         setState(() {
           properties = jsonDecode(res.body);
