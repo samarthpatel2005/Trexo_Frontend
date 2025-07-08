@@ -22,7 +22,7 @@ class _ViewVehicleScreenState extends State<ViewVehicleScreen> {
 
   Future<void> fetchVehicles() async {
     try {
-      final res = await http.get(Uri.parse('http://localhost:5000/api/view/vehicle'));
+      final res = await http.get(Uri.parse('http://13.203.148.184/api/view/vehicle'));
       if (res.statusCode == 200) {
         setState(() {
           vehicles = jsonDecode(res.body);
