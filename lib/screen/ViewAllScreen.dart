@@ -1,8 +1,11 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:trexo/services/admin_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:trexo/widget/InteractiveCard.dart';
+import 'package:trexo/services/admin_service.dart';
+import 'package:trexo/widget/property_listing_card.dart';
+import 'package:trexo/widget/vehicle_listing_card.dart';
+// import 'package:trexo/widget/InteractiveCard.dart';
 
 class ViewAllScreen extends StatefulWidget {
   const ViewAllScreen({super.key});
@@ -11,7 +14,8 @@ class ViewAllScreen extends StatefulWidget {
   State<ViewAllScreen> createState() => _ViewAllScreenState();
 }
 
-class _ViewAllScreenState extends State<ViewAllScreen> with TickerProviderStateMixin {
+class _ViewAllScreenState extends State<ViewAllScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   List properties = [];
   List vehicles = [];
@@ -49,20 +53,42 @@ class _ViewAllScreenState extends State<ViewAllScreen> with TickerProviderStateM
   }
 
   Widget buildPropertyCard(Map data) {
-    return InteractiveListingCard(
+    return PropertyListingCard(
+      imageUrl:
+          (data['imageUrls'] != null && data['imageUrls'].isNotEmpty)
+              ? data['imageUrls'][0]
+              : 'https://via.placeholder.com/300x120.png?text=No+Image',
       title: data['title'] ?? '',
       price: (data['price'] ?? 0).toDouble(),
       location: data['location'] ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      onDetailsPressed: () {},
     );
   }
 
   Widget buildVehicleCard(Map data) {
-    return InteractiveListingCard(
-      title: data['name'] ?? '',
+    return VehicleListingCard(
+      imageUrl:
+          (data['imageUrls'] != null && data['imageUrls'].isNotEmpty)
+              ? data['imageUrls'][0]
+              : 'https://via.placeholder.com/300x120.png?text=No+Image',
+      name: data['name'] ?? '',
+      year: data['year']?.toString() ?? '2023',
+      variant: data['model'] ?? '',
       price: (data['price'] ?? 0).toDouble(),
-      location: data['model'] ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      emi: data['emi'] ?? 'N/A',
+      km: data['km'] ?? '0 km',
+      fuelType: data['fuelType'] ?? 'Petrol',
+      transmission: data['transmission'] ?? 'Manual',
+      registration: data['registration'] ?? 'GJ',
+      location: data['location'] ?? 'Unknown',
+      badgeText: data['assured'] == true ? 'Assured' : 'Verified',
+      badgeDescription:
+          data['assured'] == true
+              ? 'High quality, less driven'
+              : 'Latest cars, 3 year warranty',
+      isAssured: data['assured'] == true,
+      isFavorite: false,
+      onFavorite: () {},
     );
   }
 
@@ -73,33 +99,31 @@ class _ViewAllScreenState extends State<ViewAllScreen> with TickerProviderStateM
         title: const Text("All Listings"),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: "Properties"),
-            Tab(text: "Vehicles"),
-          ],
+          tabs: const [Tab(text: "Properties"), Tab(text: "Vehicles")],
         ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                properties.isEmpty
-                    ? const Center(child: Text("No properties found"))
-                    : ListView.builder(
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                controller: _tabController,
+                children: [
+                  properties.isEmpty
+                      ? const Center(child: Text("No properties found"))
+                      : ListView.builder(
                         padding: const EdgeInsets.all(8),
                         itemCount: properties.length,
                         itemBuilder: (_, i) => buildPropertyCard(properties[i]),
                       ),
-                vehicles.isEmpty
-                    ? const Center(child: Text("No vehicles found"))
-                    : ListView.builder(
+                  vehicles.isEmpty
+                      ? const Center(child: Text("No vehicles found"))
+                      : ListView.builder(
                         padding: const EdgeInsets.all(8),
                         itemCount: vehicles.length,
                         itemBuilder: (_, i) => buildVehicleCard(vehicles[i]),
                       ),
-              ],
-            ),
+                ],
+              ),
     );
   }
 }
