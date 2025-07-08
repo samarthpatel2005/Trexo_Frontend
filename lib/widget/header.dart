@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trexo/widget/ResponsiveScaffold.dart';
+// import 'package:trexo/widget/ResponsiveScaffold.dart';
 
 class SimpleHeader extends StatelessWidget implements PreferredSizeWidget {
   const SimpleHeader({super.key});

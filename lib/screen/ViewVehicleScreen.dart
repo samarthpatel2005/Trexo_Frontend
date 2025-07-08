@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:trexo/screen/VehicleDetailsPage.dart';
 // import 'package:trexo/widget/InteractiveCard.dart';
 import 'package:trexo/widget/vehicle_listing_card.dart';
 
@@ -25,9 +24,7 @@ class _ViewVehicleScreenState extends State<ViewVehicleScreen> {
 
   Future<void> fetchVehicles() async {
     try {
-      final res = await http.get(
-        Uri.parse('http://13.203.148.184/api/view/vehicle'),
-      );
+      final res = await http.get(Uri.parse('http://13.203.148.184/api/view/vehicle'));
       if (res.statusCode == 200) {
         setState(() {
           vehicles = jsonDecode(res.body);
@@ -98,15 +95,6 @@ class _ViewVehicleScreenState extends State<ViewVehicleScreen> {
                     isAssured: item['assured'] == true,
                     isFavorite: false,
                     onFavorite: () {},
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => VehicleDetailsPage(vehicle: item),
-                        ),
-                      );
-                    },
                   );
                 },
               ),
