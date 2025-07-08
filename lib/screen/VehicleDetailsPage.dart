@@ -375,7 +375,7 @@ class _ImageCarouselWithArrowsState extends State<_ImageCarouselWithArrows> {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> images = List<String>.from(widget.imageUrls ?? []);
+    final List<String> images = List<String>.from(widget.imageUrls);
     return Stack(
       children: [
         CarouselSlider(
