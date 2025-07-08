@@ -32,14 +32,13 @@ dependencies:
     sdk: flutter
 
   
-  
+  carousel_slider: ^5.1.1
   cupertino_icons: ^1.0.8
   http: ^1.4.0
   fluttertoast: ^8.2.12
   shared_preferences: ^2.5.3
   image_picker: ^1.1.2
   intl: ^0.20.2
-  carousel_slider: ^5.1.1
 
 dev_dependencies:
   flutter_test:
