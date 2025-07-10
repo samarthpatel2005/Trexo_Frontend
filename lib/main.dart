@@ -37,10 +37,9 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(email: ''), // use user email if needed
         '/profile': (context) => const ProfilePage(),
         '/about': (context) => const AboutPage(),
-        '/admindashboard': (context) => const AdminDashboard(), // ✅ renamed to match splash redirect
+        // '/admindashboard': (context) => const AdminDashboard(), 
         '/add-vehicle': (context) => const AddVehicleScreen(),
         '/add-property': (context) => const AddPropertyScreen(),
-        // '/view-all': (context) => const ViewAllScreen(),
         '/view-property': (context) => const ViewPropertyScreen(),
         '/view-vehicle': (context) => const ViewVehicleScreen(),
         '/vehicle-details': (context) {
