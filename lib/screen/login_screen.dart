@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trexo/screen/admin_dashboard.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
-import 'admin_dashboard.dart';
+// import 'admin_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,10 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
           Fluttertoast.showToast(msg: "🎉 Login successful");
 
           if (user['role'] == 'admin') {
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(builder: (_) => const AdminDashboard()),
-            // );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminDashboard()),
+            );
           } else {
             Navigator.pushReplacement(
               context,
