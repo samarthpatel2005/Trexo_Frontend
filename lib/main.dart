@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:trexo/screen/VehicleDetailsPage.dart';
-import 'package:trexo/screen/ViewAllScreen.dart';
+// import 'package:trexo/screen/ViewAllScreen.dart';
 import 'package:trexo/screen/ViewPropertyScreen.dart';
 import 'package:trexo/screen/ViewVehicleScreen.dart';
 import 'package:trexo/screen/about.dart';
 import 'package:trexo/screen/add_property_screen.dart';
 import 'package:trexo/screen/add_vehicle_screen.dart';
-import 'package:trexo/screen/admin_dashboard.dart';
+// import 'package:trexo/screen/admin_dashboard.dart';
 import 'package:trexo/screen/home_screen.dart';
 import 'package:trexo/screen/login_screen.dart';
 import 'package:trexo/screen/profile_page.dart';
@@ -37,10 +37,10 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(email: ''), // use user email if needed
         '/profile': (context) => const ProfilePage(),
         '/about': (context) => const AboutPage(),
-        '/admindashboard': (context) => const AdminDashboard(), // ✅ renamed to match splash redirect
+        // '/admindashboard': (context) => const AdminDashboard(), 
         '/add-vehicle': (context) => const AddVehicleScreen(),
         '/add-property': (context) => const AddPropertyScreen(),
-        '/view-all': (context) => const ViewAllScreen(),
+        // '/view-all': (context) => const ViewAllScreen(),
         '/view-property': (context) => const ViewPropertyScreen(),
         '/view-vehicle': (context) => const ViewVehicleScreen(),
         '/vehicle-details': (context) {
