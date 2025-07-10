@@ -11,6 +11,7 @@ import 'package:trexo/screen/home_screen.dart';
 import 'package:trexo/screen/login_screen.dart';
 import 'package:trexo/screen/profile_page.dart';
 import 'package:trexo/screen/signup_screen.dart';
+import 'package:trexo/screen/splash_screen.dart'; // ✅ splash screen import
 
 void main() {
   runApp(const MyApp());
@@ -26,29 +27,24 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
 
-      // Default screen
-      initialRoute: '/signup',
+      // ✅ Set splash screen as initial route
+      initialRoute: '/',
 
-      // Route definitions
       routes: {
+        '/': (context) => const SplashScreen(), // 🔁 NEW ENTRY POINT
         '/signup': (context) => const SignupScreen(),
         '/login': (context) => const LoginScreen(),
-        '/home':
-            (context) => const HomeScreen(
-              email: '',
-            ), // 👈 Replace with dynamic email in Login
+        '/home': (context) => const HomeScreen(email: ''), // use user email if needed
         '/profile': (context) => const ProfilePage(),
         '/about': (context) => const AboutPage(),
-        '/admin': (context) => const AdminDashboard(), // ✅ Add this
+        '/admindashboard': (context) => const AdminDashboard(), // ✅ renamed to match splash redirect
         '/add-vehicle': (context) => const AddVehicleScreen(),
         '/add-property': (context) => const AddPropertyScreen(),
         // '/view-all': (context) => const ViewAllScreen(),
         '/view-property': (context) => const ViewPropertyScreen(),
         '/view-vehicle': (context) => const ViewVehicleScreen(),
         '/vehicle-details': (context) {
-          final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return VehicleDetailsPage(vehicle: args['vehicle']);
         },
       },
