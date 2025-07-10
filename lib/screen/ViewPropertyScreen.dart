@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:trexo/screen/PropertyDetailsPage.dart';
 import 'package:trexo/widget/property_listing_card.dart';
 // import 'package:trexo/widget/InteractiveCard.dart';
 
@@ -24,7 +25,9 @@ class _ViewPropertyScreenState extends State<ViewPropertyScreen> {
 
   Future<void> fetchProperties() async {
     try {
-      final res = await http.get(Uri.parse('http://13.203.148.184/api/view/property'));
+      final res = await http.get(
+        Uri.parse('http://13.203.148.184/api/view/property'),
+      );
       if (res.statusCode == 200) {
         setState(() {
           properties = jsonDecode(res.body);
@@ -75,6 +78,15 @@ class _ViewPropertyScreenState extends State<ViewPropertyScreen> {
                     onDetailsPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Details of ${item['title']}")),
+                      );
+                    },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => PropertyDetailsPage(property: item),
+                        ),
                       );
                     },
                   );
