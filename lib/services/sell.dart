@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AdminService {
-  static const baseUrl = 'http://13.203.148.184/api/admin';
+  static const baseUrl = 'http://13.203.148.184/api/sell';
 
   static Future<http.Response> addProperty(Map<String, dynamic> data, String token) async {
     return await http.post(
@@ -23,26 +23,6 @@ class AdminService {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(data),
-    );
-  }
-
-  static Future<http.Response> getProperties(String token) async {
-    return await http.get(
-      Uri.parse('$baseUrl/properties'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-  }
-
-  static Future<http.Response> getVehicles(String token) async {
-    return await http.get(
-      Uri.parse('$baseUrl/vehicles'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
     );
   }
 }

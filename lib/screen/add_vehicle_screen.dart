@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:trexo/services/admin_service.dart';
+import 'package:trexo/services/sell.dart';
 
 class AddVehicleScreen extends StatefulWidget {
   const AddVehicleScreen({super.key});

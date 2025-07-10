@@ -49,10 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
           Fluttertoast.showToast(msg: "🎉 Login successful");
 
           if (user['role'] == 'admin') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminDashboard()),
-            );
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(builder: (_) => const AdminDashboard()),
+            // );
           } else {
             Navigator.pushReplacement(
               context,
