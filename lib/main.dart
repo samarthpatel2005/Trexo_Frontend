@@ -6,7 +6,7 @@ import 'package:trexo/screen/ViewVehicleScreen.dart';
 import 'package:trexo/screen/about.dart';
 import 'package:trexo/screen/add_property_screen.dart';
 import 'package:trexo/screen/add_vehicle_screen.dart';
-import 'package:trexo/screen/admin_dashboard.dart';
+// import 'package:trexo/screen/admin_dashboard.dart';
 import 'package:trexo/screen/home_screen.dart';
 import 'package:trexo/screen/login_screen.dart';
 import 'package:trexo/screen/profile_page.dart';
