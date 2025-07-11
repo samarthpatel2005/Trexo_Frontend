@@ -26,10 +26,10 @@ class _SplashScreenState extends State<SplashScreen> {
     if (token != null && token.isNotEmpty) {
       // ✅ User is logged in
       if (role == 'admin') {
-      //  Navigator.pushReplacement(
-      //         context,
-      //         MaterialPageRoute(builder: (_) => const AdminDashboard()),
-      //       );
+       Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminDashboard()),
+            );
       } else {
         Navigator.pushReplacementNamed(context, '/home');
       }

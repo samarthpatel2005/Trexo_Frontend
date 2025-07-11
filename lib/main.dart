@@ -40,7 +40,6 @@ class MyApp extends StatelessWidget {
         // '/admindashboard': (context) => const AdminDashboard(), 
         '/add-vehicle': (context) => const AddVehicleScreen(),
         '/add-property': (context) => const AddPropertyScreen(),
-        // '/view-all': (context) => const ViewAllScreen(),
         '/view-property': (context) => const ViewPropertyScreen(),
         '/view-vehicle': (context) => const ViewVehicleScreen(),
         '/vehicle-details': (context) {
