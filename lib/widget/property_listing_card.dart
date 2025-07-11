@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class PropertyListingCard extends StatelessWidget {
+class PropertyListingCard extends StatefulWidget {
   final String imageUrl;
   final String title;
   final double price;
@@ -35,164 +35,288 @@ class PropertyListingCard extends StatelessWidget {
   });
 
   @override
+  State<PropertyListingCard> createState() => _PropertyListingCardState();
+}
+
+class _PropertyListingCardState extends State<PropertyListingCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutBack,
+    ));
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.grey[50]!],
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 30,
+                      offset: const Offset(0, 12),
+                      spreadRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white,
+                          Colors.grey.shade50,
+                        ],
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildImageSection(),
+                        _buildContentSection(),
+                        if (widget.badgeText != null && widget.badgeDescription != null)
+                          _buildBadgeSection(),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImageSection(),
-                _buildContentSection(),
-                if (badgeText != null && badgeDescription != null)
-                  _buildBadgeSection(),
-              ],
-            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildImageSection() {
     return Stack(
       children: [
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+        Hero(
+          tag: 'property_${widget.imageUrl}',
+          child: Container(
+            height: 220,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(28),
+                topRight: Radius.circular(28),
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder:
-                  (context, error, stackTrace) => Container(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(28),
+                topRight: Radius.circular(28),
+              ),
+              child: Image.network(
+                widget.imageUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Colors.grey[300]!, Colors.grey[400]!],
+                        colors: [
+                          Colors.grey.shade100,
+                          Colors.grey.shade200,
+                        ],
                       ),
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.home_rounded,
-                        size: 60,
-                        color: Colors.white,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.teal.shade400,
+                        strokeWidth: 2,
                       ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) => Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.grey.shade200,
+                        Colors.grey.shade300,
+                      ],
                     ),
                   ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.home_work_rounded,
+                          size: 48,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Image not available',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
-        // Gradient overlay
+        // Subtle gradient overlay
         Container(
-          height: 200,
+          height: 220,
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
+              topLeft: Radius.circular(28),
+              topRight: Radius.circular(28),
             ),
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.transparent, Colors.black.withOpacity(0.1)],
-            ),
-          ),
-        ),
-        // Favorite button
-        Positioned(
-          top: 16,
-          right: 16,
-          child: GestureDetector(
-            onTap: onFavorite,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red[400] : Colors.grey[600],
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-        // Price badge
-        Positioned(
-          bottom: 16,
-          left: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
+              colors: [
+                Colors.transparent,
+                Colors.black.withOpacity(0.05),
               ],
             ),
-            child: Text(
-              '₹${_formatPrice(price)}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.indigo[800],
+          ),
+        ),
+        // Enhanced favorite button
+        Positioned(
+          top: 20,
+          right: 20,
+          child: GestureDetector(
+            onTap: widget.onFavorite,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
+              child: Icon(
+                widget.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                color: widget.isFavorite ? Colors.red.shade400 : Colors.grey.shade600,
+                size: 18,
+              ),
+            ),
+          ),
+        ),
+        // Enhanced price badge
+        Positioned(
+          bottom: 20,
+          left: 20,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.98),
+                  Colors.white.withOpacity(0.95),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              border: Border.all(
+                color: Colors.white.withOpacity(0.5),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.currency_rupee_rounded,
+                  size: 16,
+                  color: Colors.teal.shade700,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  _formatPrice(widget.price),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.teal.shade700,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -202,186 +326,208 @@ class PropertyListingCard extends StatelessWidget {
 
   Widget _buildContentSection() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            widget.title,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 18,
+              fontSize: 20,
               color: Colors.black87,
-              height: 1.2,
+              height: 1.3,
+              letterSpacing: -0.5,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Row(
             children: [
               Icon(
                 Icons.location_on_rounded,
-                size: 16,
-                color: Colors.grey[600],
+                size: 18,
+                color: Colors.grey.shade500,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  location,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  widget.location,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 15,
+                    height: 1.2,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _buildFeaturesPills(),
+          const SizedBox(height: 20),
+          _buildFeaturesSection(),
         ],
       ),
     );
   }
 
-  Widget _buildFeaturesPills() {
-    List<String> features = [];
-    if (area != null && area!.isNotEmpty) features.add(area!);
-    if (bedrooms != null && bedrooms!.isNotEmpty)
-      features.add('${bedrooms!} BHK');
-    if (bathrooms != null && bathrooms!.isNotEmpty)
-      features.add('${bathrooms!} Bath');
-    if (furnishing != null && furnishing!.isNotEmpty) features.add(furnishing!);
+  Widget _buildFeaturesSection() {
+    final List<Map<String, dynamic>> features = [];
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: features.map((feature) => _buildFeaturesPill(feature)).toList(),
-    );
-  }
-Widget _buildFeaturesPill([String? feature]) {
-  final List<Map<String, dynamic>> features = [];
+    if (widget.area != null && widget.area!.isNotEmpty) {
+      features.add({
+        'icon': Icons.square_foot_rounded,
+        'label': 'Area',
+        'value': widget.area,
+        'color': Colors.blue.shade600,
+      });
+    }
+    if (widget.bedrooms != null && widget.bedrooms!.isNotEmpty) {
+      features.add({
+        'icon': Icons.bed_rounded,
+        'label': 'Bedrooms',
+        'value': '${widget.bedrooms} BHK',
+        'color': Colors.green.shade600,
+      });
+    }
+    if (widget.bathrooms != null && widget.bathrooms!.isNotEmpty) {
+      features.add({
+        'icon': Icons.bathtub_rounded,
+        'label': 'Bathrooms',
+        'value': widget.bathrooms,
+        'color': Colors.orange.shade600,
+      });
+    }
+    if (widget.furnishing != null && widget.furnishing!.isNotEmpty) {
+      features.add({
+        'icon': Icons.weekend_rounded,
+        'label': 'Furnishing',
+        'value': widget.furnishing,
+        'color': Colors.purple.shade600,
+      });
+    }
 
-  if (area != null && area!.isNotEmpty) {
-    features.add({'icon': Icons.square_foot, 'label': 'Area', 'value': area});
-  }
-  if (bedrooms != null && bedrooms!.isNotEmpty) {
-    features.add({'icon': Icons.bed, 'label': 'Bedrooms', 'value': bedrooms});
-  }
-  if (bathrooms != null && bathrooms!.isNotEmpty) {
-    features.add({'icon': Icons.bathtub, 'label': 'Bathrooms', 'value': bathrooms});
-  }
-  if (furnishing != null && furnishing!.isNotEmpty) {
-    features.add({'icon': Icons.weekend, 'label': 'Furnishing', 'value': furnishing});
-  }
+    if (features.isEmpty) return const SizedBox();
 
-  if (features.isEmpty) return const SizedBox();
-
-  return Padding(
-    padding: const EdgeInsets.only(top: 4.0),
-    child: Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Property Overview',
+        Text(
+          'Property Features',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
+            color: Colors.grey.shade800,
+            letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: features.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 4, // Adjust for layout height
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 12,
-          ),
-          itemBuilder: (context, index) {
-            final feature = features[index];
-            return Row(
-              children: [
-                Icon(
-                  feature['icon'],
-                  color: Colors.indigo,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        feature['label'],
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      Text(
-                        feature['value'] ?? '',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: features.map((feature) => _buildFeatureChip(feature)).toList(),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
+  Widget _buildFeatureChip(Map<String, dynamic> feature) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: (feature['color'] as Color).withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: (feature['color'] as Color).withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            feature['icon'],
+            color: feature['color'],
+            size: 16,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            feature['value'],
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: feature['color'],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildBadgeSection() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [Colors.green[50]!, Colors.teal[50]!]),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green[100]!, width: 1),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green.shade50,
+            Colors.teal.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.green.shade100,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.shade100.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.green[100],
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.green.shade100,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
               Icons.verified_rounded,
-              color: Colors.green[700],
-              size: 16,
+              color: Colors.green.shade700,
+              size: 18,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  badgeText!,
+                  widget.badgeText!,
                   style: TextStyle(
-                    color: Colors.green[800],
+                    color: Colors.green.shade800,
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: 14,
+                    letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
-                  badgeDescription!,
-                  style: TextStyle(fontSize: 12, color: Colors.green[600]),
+                  widget.badgeDescription!,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.green.shade600,
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

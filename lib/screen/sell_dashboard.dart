@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:trexo/screen/home_screen.dart';
 import 'package:trexo/widget/admin_drawer.dart';
+
 import 'add_property_screen.dart';
 import 'add_vehicle_screen.dart';
-
 
 class SellDashboard extends StatelessWidget {
   const SellDashboard({super.key});
@@ -11,7 +12,23 @@ class SellDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Panel'),
+        title: const Text(
+          'Selling Dashboard',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.blue,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(email: ""),
+              ),
+              (route) => false,
+            );
+          },
+        ),
       ),
       drawer: const AdminDrawer(),
       body: Padding(
@@ -21,20 +38,39 @@ class SellDashboard extends StatelessWidget {
           crossAxisSpacing: 20,
           mainAxisSpacing: 20,
           children: [
-            _buildCard(context, 'Add Property', Icons.home_work, AddPropertyScreen()),
-            _buildCard(context, 'Add Vehicle', Icons.directions_car, AddVehicleScreen()),
+            _buildCard(
+              context,
+              'Add Property',
+              Icons.home_work,
+              AddPropertyScreen(),
+            ),
+            _buildCard(
+              context,
+              'Add Vehicle',
+              Icons.directions_car,
+              AddVehicleScreen(),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCard(BuildContext context, String title, IconData icon, Widget targetPage) {
+  Widget _buildCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Widget targetPage,
+  ) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => targetPage)),
+        onTap:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => targetPage),
+            ),
         borderRadius: BorderRadius.circular(16),
         child: Center(
           child: Column(
@@ -42,7 +78,13 @@ class SellDashboard extends StatelessWidget {
             children: [
               Icon(icon, size: 50, color: Colors.blue),
               const SizedBox(height: 10),
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
