@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 // import 'package:trexo/widget/ResponsiveScaffold.dart';
 
 class SimpleHeader extends StatefulWidget implements PreferredSizeWidget {
-  const SimpleHeader({super.key});
+  final Function(List)? onSearchResults;
+  
+  const SimpleHeader({super.key, this.onSearchResults});
 
   @override
   State<SimpleHeader> createState() => _SimpleHeaderState();
@@ -17,6 +21,8 @@ class _SimpleHeaderState extends State<SimpleHeader>
   final TextEditingController _searchController = TextEditingController();
   late AnimationController _animationController;
   late Animation<double> _animation;
+  List _searchResults = [];
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -50,24 +56,220 @@ class _SimpleHeaderState extends State<SimpleHeader>
     });
   }
 
-  void _onSearchSubmitted(String value) {
+  void _onSearchSubmitted(String value) async {
     if (value.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder:
-            (_) => AlertDialog(
-              title: const Text('Search'),
-              content: Text('You searched for "$value"'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-      );
+      setState(() {
+        _isSearching = true;
+      });
+      
+      await _performSearch(value);
+      
+      setState(() {
+        _isSearching = false;
+      });
     }
-    _toggleSearch();
+    // Don't toggle search to keep results visible
+  }
+
+  Future<void> _performSearch(String query) async {
+    try {
+      List combinedResults = [];
+      
+      // Search vehicles
+      try {
+        final vehicleResponse = await http.get(
+          Uri.parse('http://127.0.0.1:5000/api/view/search/vehicle?q=${Uri.encodeComponent(query)}'),
+        );
+        
+        if (vehicleResponse.statusCode == 200) {
+          final vehicleData = jsonDecode(vehicleResponse.body);
+          if (vehicleData is List) {
+            for (var vehicle in vehicleData) {
+              vehicle['type'] = 'vehicle'; // Add type identifier
+            }
+            combinedResults.addAll(vehicleData);
+          }
+        }
+      } catch (e) {
+        print('Vehicle search error: $e');
+      }
+      
+      // Search properties
+      try {
+        final propertyResponse = await http.get(
+          Uri.parse('http://127.0.0.1:5000/api/view/search/property?q=${Uri.encodeComponent(query)}'),
+        );
+        
+        if (propertyResponse.statusCode == 200) {
+          final propertyData = jsonDecode(propertyResponse.body);
+          if (propertyData is List) {
+            for (var property in propertyData) {
+              property['type'] = 'property'; // Add type identifier
+            }
+            combinedResults.addAll(propertyData);
+          }
+        }
+      } catch (e) {
+        print('Property search error: $e');
+      }
+      
+      setState(() {
+        _searchResults = combinedResults;
+      });
+      
+      // Show search results
+      if (combinedResults.isNotEmpty) {
+        _showSearchResults(combinedResults);
+      } else {
+        _showNoResultsDialog();
+      }
+      
+    } catch (e) {
+      print('Search error: $e');
+      _showErrorDialog();
+    }
+  }
+
+  void _showSearchResults(List results) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'Search Results (${results.length})',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: results.length,
+                itemBuilder: (context, index) {
+                  final item = results[index];
+                  final isVehicle = item['type'] == 'vehicle';
+                  
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isVehicle ? Colors.blue[100] : Colors.green[100],
+                      child: Icon(
+                        isVehicle ? Icons.directions_car : Icons.home,
+                        color: isVehicle ? Colors.blue : Colors.green,
+                      ),
+                    ),
+                    title: Text(
+                      isVehicle 
+                        ? '${item['year'] ?? ''} ${item['name'] ?? 'Unknown Vehicle'}'
+                        : item['title'] ?? 'Unknown Property',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isVehicle) ...[
+                          Text('${item['model'] ?? ''} - ${item['fuelType'] ?? ''}'),
+                          Text('₹${item['price'] ?? '0'} • ${item['location'] ?? ''}'),
+                        ] else ...[
+                          Text('${item['location'] ?? ''}'),
+                          Text('₹${item['price'] ?? '0'}'),
+                        ],
+                      ],
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isVehicle ? Colors.blue : Colors.green,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        isVehicle ? 'Vehicle' : 'Property',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (isVehicle) {
+                        Navigator.pushNamed(context, '/vehicle-details', arguments: item);
+                      } else {
+                        Navigator.pushNamed(context, '/property-details', arguments: item);
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showNoResultsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.search_off, size: 48, color: Colors.grey),
+        title: const Text('No Results Found'),
+        content: Text('No vehicles or properties found matching "${_searchController.text}"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.error_outline, size: 48, color: Colors.red),
+        title: const Text('Search Error'),
+        content: const Text('Something went wrong while searching. Please try again.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -98,12 +300,12 @@ class _SimpleHeaderState extends State<SimpleHeader>
 
               // Desktop: search + nav buttons
               if (!isMobile) ...[
-                SizedBox(
+                  SizedBox(
                   width: 250,
                   child: TextField(
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Search...',
+                      hintText: 'Search vehicles & properties...',
                       hintStyle: const TextStyle(color: Colors.white70),
                       filled: true,
                       fillColor: Colors.blue[700],
@@ -114,18 +316,21 @@ class _SimpleHeaderState extends State<SimpleHeader>
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
                       ),
-                      prefixIcon: const Icon(Icons.search, color: Colors.white),
-                    ),
-                    onSubmitted: (value) {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (_) => AlertDialog(
-                              title: const Text('Search'),
-                              content: Text('You searched for "$value"'),
+                      prefixIcon: _isSearching 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Padding(
+                              padding: EdgeInsets.all(8),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
                             ),
-                      );
-                    },
+                          )
+                        : const Icon(Icons.search, color: Colors.white),
+                    ),
+                    onSubmitted: _onSearchSubmitted,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -159,7 +364,7 @@ class _SimpleHeaderState extends State<SimpleHeader>
                         autofocus: true,
                         style: const TextStyle(color: Colors.black),
                         decoration: InputDecoration(
-                          hintText: 'Search...',
+                          hintText: 'Search vehicles & properties...',
                           hintStyle: const TextStyle(color: Colors.black),
                           filled: true,
                           fillColor: Colors.white,
@@ -171,10 +376,19 @@ class _SimpleHeaderState extends State<SimpleHeader>
                             borderRadius: BorderRadius.circular(24),
                             borderSide: BorderSide.none,
                           ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.black,
-                          ),
+                          prefixIcon: _isSearching 
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                                  ),
+                                ),
+                              )
+                            : const Icon(Icons.search, color: Colors.black),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.close, color: Colors.black),
                             onPressed: _toggleSearch,

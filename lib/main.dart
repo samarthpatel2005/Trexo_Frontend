@@ -34,17 +34,34 @@ class MyApp extends StatelessWidget {
         '/': (context) => const SplashScreen(), // 🔁 NEW ENTRY POINT
         '/signup': (context) => const SignupScreen(),
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(email: ''), // use user email if needed
+        '/home':
+            (context) =>
+                const HomeScreen(email: ''), // use user email if needed
         '/profile': (context) => const ProfilePage(),
         '/about': (context) => const AboutPage(),
-        // '/admindashboard': (context) => const AdminDashboard(), 
+        // '/admindashboard': (context) => const AdminDashboard(),
         '/add-vehicle': (context) => const AddVehicleScreen(),
         '/add-property': (context) => const AddPropertyScreen(),
         '/view-property': (context) => const ViewPropertyScreen(),
         '/view-vehicle': (context) => const ViewVehicleScreen(),
         '/vehicle-details': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-          return VehicleDetailsPage(vehicle: args['vehicle']);
+          final args = ModalRoute.of(context)!.settings.arguments;
+          // Handle both old format (Map with 'vehicle' key) and new format (direct vehicle object)
+          final vehicle =
+              args is Map<String, dynamic>
+                  ? (args.containsKey('vehicle') ? args['vehicle'] : args)
+                  : args;
+          return VehicleDetailsPage(vehicle: vehicle);
+        },
+        '/property-details': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          // Simple property details page - you can create a proper one later
+          return Scaffold(
+            appBar: AppBar(title: const Text('Property Details')),
+            body: Center(
+              child: Text('Property Details Page\n${args.toString()}'),
+            ),
+          );
         },
       },
     );
