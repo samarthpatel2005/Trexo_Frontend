@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:trexo/screen/VehicleDetailsPage.dart';
 // import 'package:trexo/widget/InteractiveCard.dart';
 import 'package:trexo/widget/vehicle_listing_card.dart';
+import 'package:trexo/widget/header.dart';
 
 class ViewVehicleScreen extends StatefulWidget {
   const ViewVehicleScreen({super.key});
@@ -26,7 +27,7 @@ class _ViewVehicleScreenState extends State<ViewVehicleScreen> {
   Future<void> fetchVehicles() async {
     try {
       final res = await http.get(
-        Uri.parse('http://13.203.148.184/api/view/vehicle'),
+        Uri.parse('http://127.0.0.1:5000/api/view/vehicle'),
       );
       if (res.statusCode == 200) {
         setState(() {
