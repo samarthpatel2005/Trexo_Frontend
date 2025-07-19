@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String baseUrl = "http://13.203.148.184/api/auth";
+const String baseUrl = "http://209.38.124.176/api/auth";
 
 class AuthService {
   static const Map<String, String> _headers = {

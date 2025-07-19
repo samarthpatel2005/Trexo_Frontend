@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AdminService {
-  static const baseUrl = 'http://13.203.148.184/api/sell';
+  static const baseUrl = 'http://209.38.124.176/api/sell';
 
   static Future<http.Response> addProperty(Map<String, dynamic> data, String token) async {
     return await http.post(

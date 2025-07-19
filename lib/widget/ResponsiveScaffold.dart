@@ -33,7 +33,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const SimpleHeader(),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: const SimpleHeader(),
+      ),
       drawer:
           MediaQuery.of(context).size.width < 600
               ? Drawer(

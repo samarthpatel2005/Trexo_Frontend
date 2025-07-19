@@ -18,7 +18,6 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  bool _isAppBarExpanded = true;
   bool _isFavorite = false;
 
   @override
@@ -45,12 +44,6 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
       CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
     );
 
-    _scrollController.addListener(() {
-      setState(() {
-        _isAppBarExpanded = _scrollController.offset < 200;
-      });
-    });
-
     // Start animations
     _fadeController.forward();
     _slideController.forward();
@@ -67,31 +60,122 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
   String formatPrice(num price) =>
       '₹${NumberFormat('#,##,000.00').format(price)}';
 
+  Widget _buildHeader() {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          const Text(
+            'Vehicle Details',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Icon(
+                      _isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: _isFavorite ? Colors.red : Colors.black,
+                      key: ValueKey(_isFavorite),
+                    ),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isFavorite = !_isFavorite;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.share, color: Colors.black),
+                  onPressed: () {
+                    // Share functionality
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageCarousel() {
+    return Container(
+      height: 280,
+      margin: const EdgeInsets.all(16),
+      child: _ImageCarouselWithArrows(
+        imageUrls: widget.vehicle['imageUrls'] ?? [],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
-        body: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            _buildSliverAppBar(),
-            SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    children: [
-                      _buildMainInfoCard(),
-                      _buildPriceSection(context),
-                      _buildSpecsGrid(),
-                      _buildOverviewSection(),
-                      _buildQualityReportSection(),
-                      _buildFeaturesSection(),
-                      _buildShareSection(),
-                      const SizedBox(height: 100),
-                    ],
+        body: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Column(
+                      children: [
+                        _buildImageCarousel(),
+                        _buildMainInfoCard(),
+                        _buildPriceSection(context),
+                        _buildSpecsGrid(),
+                        _buildOverviewSection(),
+                        _buildQualityReportSection(),
+                        _buildDescriptionSection(),
+                        _buildShareSection(),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -101,67 +185,6 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
         floatingActionButton: _buildFloatingButtons(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
-    );
-  }
-
-  Widget _buildSliverAppBar() {
-    return SliverAppBar(
-      expandedHeight: 280,
-      floating: false,
-      pinned: true,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      flexibleSpace: FlexibleSpaceBar(
-        background: _ImageCarouselWithArrows(
-          imageUrls: widget.vehicle['imageUrls'] ?? [],
-        ),
-      ),
-      leading: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : Colors.black,
-                key: ValueKey(_isFavorite),
-              ),
-            ),
-            onPressed: () {
-              setState(() {
-                _isFavorite = !_isFavorite;
-              });
-            },
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.share, color: Colors.black),
-            onPressed: () {},
-          ),
-        ),
-      ],
     );
   }
 
@@ -625,15 +648,9 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
     );
   }
 
-  Widget _buildFeaturesSection() {
-    final features = [
-      {'icon': Icons.ac_unit, 'name': 'Air Conditioning'},
-      {'icon': Icons.music_note, 'name': 'Music System'},
-      {'icon': Icons.security, 'name': 'Power Steering'},
-      {'icon': Icons.window, 'name': 'Power Windows'},
-      {'icon': Icons.lock, 'name': 'Central Locking'},
-      {'icon': Icons.safety_check, 'name': 'Airbags'},
-    ];
+  Widget _buildDescriptionSection() {
+    final description =
+        widget.vehicle['description'] ?? 'No description available';
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -654,10 +671,14 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
         children: [
           Row(
             children: [
-              Icon(Icons.star_outline, color: Colors.amber[600], size: 24),
+              Icon(
+                Icons.description_outlined,
+                color: Colors.purple[600],
+                size: 24,
+              ),
               const SizedBox(width: 12),
               const Text(
-                "Key Features",
+                "Description",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -666,47 +687,15 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+          const SizedBox(height: 16),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[700],
+              height: 1.5,
+              fontWeight: FontWeight.w400,
             ),
-            itemCount: features.length,
-            itemBuilder: (context, index) {
-              final feature = features[index];
-              return Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      feature['icon'] as IconData,
-                      color: Colors.purple[600],
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        feature['name'] as String,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
         ],
       ),
