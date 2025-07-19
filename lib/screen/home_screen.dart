@@ -6,29 +6,14 @@ import 'package:trexo/screen/sell_dashboard.dart';
 import 'package:trexo/widget/ResponsiveScaffold.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.email});
-  final String email;
+  const HomeScreen({super.key, required email});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool showProperty = true;
-  String? userEmail;
-
-  @override
-  void initState() {
-    super.initState();
-    loadUserData();
-  }
-
-  Future<void> loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userEmail = prefs.getString('email');
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,23 +23,23 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             children: [
               const SizedBox(height: 20),
-              if (userEmail != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text("Logged in as: $userEmail"),
-                ),
 
+              // Toggle Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                     onPressed: () => setState(() => showProperty = true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: showProperty ? Colors.teal : Colors.grey[300],
+                      backgroundColor:
+                          showProperty ? Colors.teal : Colors.grey[300],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: const Text("Property"),
                   ),
@@ -62,11 +47,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ElevatedButton(
                     onPressed: () => setState(() => showProperty = false),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: !showProperty ? Colors.teal : Colors.grey[300],
+                      backgroundColor:
+                          !showProperty ? Colors.teal : Colors.grey[300],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: const Text("Vehicle"),
                   ),
@@ -75,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
+              // Show content
               Expanded(
                 child: showProperty
                     ? const ViewPropertyScreen()
@@ -82,19 +72,46 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-
+          // Floating Action Button at bottom right
           Positioned(
-            bottom: 24,
+            bottom: 100, // Position above bottom navigation
             right: 24,
-            child: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SellDashboard()),
-                );
-              },
-              backgroundColor: Colors.teal,
-              child: const Icon(Icons.add),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.teal.shade400, Colors.teal.shade600],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.teal.shade200,
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SellDashboard(),
+                    ),
+                  );
+                },
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text(
+                  'Sell',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

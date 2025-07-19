@@ -1,10 +1,34 @@
 import 'package:flutter/material.dart';
-import 'header.dart'; // Make sure SimpleHeader is updated as per previous messages
 
-class ResponsiveScaffold extends StatelessWidget {
+import '../services/auth_service.dart';
+import 'header.dart';
+
+class ResponsiveScaffold extends StatefulWidget {
   final Widget body;
 
   const ResponsiveScaffold({super.key, required this.body});
+
+  @override
+  State<ResponsiveScaffold> createState() => _ResponsiveScaffoldState();
+}
+
+class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUser();
+  }
+
+  void fetchUser() async {
+    final data = await AuthService.getProfile();
+    setState(() {
+      userData = data;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,26 +60,40 @@ class ResponsiveScaffold extends StatelessWidget {
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          CircleAvatar(
+                        children: [
+                          const CircleAvatar(
                             radius: 30,
                             backgroundImage: AssetImage(
                               'assets/images/logocopy-modified.png',
-                            ), // replace with your image
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Hello, User!",
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            "user@example.com",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
                             ),
                           ),
+                          const SizedBox(height: 10),
+                          isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Text(
+                                "Hello, ${userData?['name'] ?? 'User'}!",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                ),
+                              ),
+                          const SizedBox(height: 5),
+                          isLoading
+                              ? Container(height: 14)
+                              : Text(
+                                userData?['email'] ?? 'user@example.com',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
                         ],
                       ),
                     ),
@@ -75,19 +113,6 @@ class ResponsiveScaffold extends StatelessWidget {
                             context,
                             '/about',
                           ),
-                          const Divider(),
-                          _buildDrawerItem(
-                            Icons.settings,
-                            "Settings",
-                            context,
-                            '/settings',
-                          ),
-                          _buildDrawerItem(
-                            Icons.logout,
-                            "Logout",
-                            context,
-                            '/logout',
-                          ),
                         ],
                       ),
                     ),
@@ -95,8 +120,7 @@ class ResponsiveScaffold extends StatelessWidget {
                 ),
               )
               : null,
-
-      body: body,
+      body: widget.body,
     );
   }
 }

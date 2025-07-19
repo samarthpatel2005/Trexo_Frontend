@@ -69,36 +69,38 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Column(
-                  children: [
-                    _buildMainInfoCard(),
-                    _buildPriceSection(context),
-                    _buildSpecsGrid(),
-                    _buildOverviewSection(),
-                    _buildQualityReportSection(),
-                    _buildFeaturesSection(),
-                    _buildShareSection(),
-                    const SizedBox(height: 100),
-                  ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            _buildSliverAppBar(),
+            SliverToBoxAdapter(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      _buildMainInfoCard(),
+                      _buildPriceSection(context),
+                      _buildSpecsGrid(),
+                      _buildOverviewSection(),
+                      _buildQualityReportSection(),
+                      _buildFeaturesSection(),
+                      _buildShareSection(),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+        floatingActionButton: _buildFloatingButtons(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
-      floatingActionButton: _buildFloatingButtons(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
