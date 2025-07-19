@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:trexo/screen/VehicleDetailsPage.dart';
 // import 'package:trexo/widget/InteractiveCard.dart';
 import 'package:trexo/widget/vehicle_listing_card.dart';
+import 'package:trexo/widget/header.dart';
 
 class ViewVehicleScreen extends StatefulWidget {
   const ViewVehicleScreen({super.key});

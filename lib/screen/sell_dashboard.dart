@@ -12,23 +12,7 @@ class SellDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Selling Dashboard',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.blue,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(email: ""),
-              ),
-              (route) => false,
-            );
-          },
-        ),
+        title: const Text('Admin Panel'),
       ),
       drawer: const AdminDrawer(),
       body: Padding(
