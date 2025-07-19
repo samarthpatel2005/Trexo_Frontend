@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trexo/screen/ViewPropertyScreen.dart';
 import 'package:trexo/screen/ViewVehicleScreen.dart';
 import 'package:trexo/screen/sell_dashboard.dart';
 import 'package:trexo/widget/ResponsiveScaffold.dart';
-// import 'package:trexo/widget/header.dart';
-
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required email});
+  const HomeScreen({super.key, required this.email});
+  final String email;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -15,6 +15,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool showProperty = true;
+  String? userEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userEmail = prefs.getString('email');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,23 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             children: [
               const SizedBox(height: 20),
+              if (userEmail != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text("Logged in as: $userEmail"),
+                ),
 
-              // Toggle Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                     onPressed: () => setState(() => showProperty = true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          showProperty ? Colors.teal : Colors.grey[300],
+                      backgroundColor: showProperty ? Colors.teal : Colors.grey[300],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     child: const Text("Property"),
                   ),
@@ -48,15 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ElevatedButton(
                     onPressed: () => setState(() => showProperty = false),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          !showProperty ? Colors.teal : Colors.grey[300],
+                      backgroundColor: !showProperty ? Colors.teal : Colors.grey[300],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     child: const Text("Vehicle"),
                   ),
@@ -65,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // Show content
               Expanded(
                 child: showProperty
                     ? const ViewPropertyScreen()
@@ -73,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          // Floating Action Button at bottom right
+
           Positioned(
             bottom: 24,
             right: 24,
