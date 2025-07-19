@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String baseUrl = "http://127.0.0.1:5000/api/admin";
+const String baseUrl = "http://209.38.124.176/api/admin";
 
 class AdminService {
   // Fetch all users
