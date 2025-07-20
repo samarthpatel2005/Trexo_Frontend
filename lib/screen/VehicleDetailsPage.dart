@@ -188,95 +188,6 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
     );
   }
 
-<<<<<<< HEAD
-=======
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Vehicle Details',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Icon(
-                  _isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: _isFavorite ? Colors.red : Colors.black,
-                  key: ValueKey(_isFavorite),
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  _isFavorite = !_isFavorite;
-                });
-              },
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.share, color: Colors.black),
-              onPressed: () {
-                // Handle share functionality
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImageCarousel() {
-    return Container(
-      height: 280,
-      margin: const EdgeInsets.all(16),
-      child: _ImageCarouselWithArrows(
-        imageUrls: widget.vehicle['imageUrls'] ?? [],
-      ),
-    );
-  }
-
->>>>>>> b1ef0232c8fd623a98d9a7b143f52da084c737e7
   Widget _buildMainInfoCard() {
     return Container(
       margin: const EdgeInsets.all(16),
@@ -738,16 +649,11 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
   }
 
   Widget _buildDescriptionSection() {
-<<<<<<< HEAD
-    final description =
-        widget.vehicle['description'] ?? 'No description available';
-=======
     final description = widget.vehicle['description'] ?? '';
 
     if (description.isEmpty) {
       return const SizedBox.shrink();
     }
->>>>>>> b1ef0232c8fd623a98d9a7b143f52da084c737e7
 
     return Container(
       margin: const EdgeInsets.all(16),
