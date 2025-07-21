@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trexo/screen/ViewPropertyScreen.dart';
 import 'package:trexo/screen/ViewVehicleScreen.dart';
 import 'package:trexo/screen/sell_dashboard.dart';
@@ -24,57 +23,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               const SizedBox(height: 20),
 
-              // Toggle Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => setState(() => showProperty = true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          showProperty ? Colors.teal : Colors.grey[300],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: const Text("Property"),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () => setState(() => showProperty = false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          !showProperty ? Colors.teal : Colors.grey[300],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: const Text("Vehicle"),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
               // Show content
               Expanded(
-                child: showProperty
-                    ? const ViewPropertyScreen()
-                    : const ViewVehicleScreen(),
+                child:
+                    showProperty
+                        ? const ViewPropertyScreen()
+                        : const ViewVehicleScreen(),
               ),
             ],
           ),
-          // Floating Action Button at bottom right
+          // Floating Sell Button at bottom right
           Positioned(
-            bottom: 100, // Position above bottom navigation
+            bottom: 85, // Position above toggle bar
             right: 24,
             child: Container(
               decoration: BoxDecoration(
@@ -109,6 +69,167 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Full Width Toggle Bar at Bottom
+          Positioned(
+            bottom: 0, // Position at the very bottom of screen
+            left: 0,
+            right: 0,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.teal.shade50, Colors.teal.shade100],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.teal.shade200.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Animated Background
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOutCubic,
+                        left:
+                            showProperty
+                                ? 10
+                                : MediaQuery.of(context).size.width / 2 - 10,
+                        top: 10,
+                        bottom: 10,
+                        width: MediaQuery.of(context).size.width / 2 - 30,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.teal.shade400,
+                                Colors.teal.shade600,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.shade300.withOpacity(0.6),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Toggle Options
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => showProperty = true),
+                              child: Container(
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: AnimatedDefaultTextStyle(
+                                    duration: const Duration(milliseconds: 300),
+                                    style: TextStyle(
+                                      color:
+                                          showProperty
+                                              ? Colors.white
+                                              : Colors.teal.shade700,
+                                      fontWeight:
+                                          showProperty
+                                              ? FontWeight.bold
+                                              : FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.home_work,
+                                          color:
+                                              showProperty
+                                                  ? Colors.white
+                                                  : Colors.teal.shade700,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Text("Property"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => showProperty = false),
+                              child: Container(
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: AnimatedDefaultTextStyle(
+                                    duration: const Duration(milliseconds: 300),
+                                    style: TextStyle(
+                                      color:
+                                          !showProperty
+                                              ? Colors.white
+                                              : Colors.teal.shade700,
+                                      fontWeight:
+                                          !showProperty
+                                              ? FontWeight.bold
+                                              : FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.directions_car,
+                                          color:
+                                              !showProperty
+                                                  ? Colors.white
+                                                  : Colors.teal.shade700,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Text("Vehicle"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
