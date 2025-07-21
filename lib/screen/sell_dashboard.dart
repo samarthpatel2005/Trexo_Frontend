@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:trexo/screen/home_screen.dart';
 import 'package:trexo/widget/admin_drawer.dart';
 
 import 'add_property_screen.dart';
@@ -12,7 +11,14 @@ class SellDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Panel'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back,color: Colors.white,),
+          onPressed: () {
+            Navigator.popUntil(context, ModalRoute.withName('/home'));
+          },
+        ),
+        title: const Text('Admin Panel',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
+        backgroundColor: Colors.blue,
       ),
       drawer: const AdminDrawer(),
       body: Padding(
