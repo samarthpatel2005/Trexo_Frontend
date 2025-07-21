@@ -317,7 +317,6 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
       ),
       body: Container(
         width: double.infinity,
