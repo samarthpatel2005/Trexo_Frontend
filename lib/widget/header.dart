@@ -449,7 +449,7 @@ class _SimpleHeaderState extends State<SimpleHeader>
                       duration: const Duration(milliseconds: 300),
                       child: Image.asset(
                         'assets/images/logo.png',
-                        height: 1000,
+                        height: 80,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -591,10 +591,7 @@ class _SimpleHeaderState extends State<SimpleHeader>
                           (context) => IconButton(
                             icon: const Icon(Icons.menu, color: Colors.white),
                             onPressed: () {
-                              // Handle menu action - for now just show a snackbar
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Menu pressed')),
-                              );
+                              Scaffold.of(context).openDrawer();
                             },
                           ),
                     ),
