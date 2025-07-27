@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   bool isLoading = false;
+  bool _isPasswordVisible = false;
 
   void login(BuildContext context) async {
     final email = emailCtrl.text.trim();
@@ -57,7 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
           } else {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => HomeScreen(email: user['email'])),
+              MaterialPageRoute(
+                builder: (_) => HomeScreen(email: user['email']),
+              ),
             );
           }
         } else {
@@ -90,14 +93,18 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
               Card(
                 elevation: 8,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
                       Text(
                         'Welcome Back 👋',
-                        style: theme.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.headlineSmall!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 20),
                       TextField(
@@ -109,14 +116,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
                       TextField(
                         controller: passCtrl,
-                        obscureText: true,
-                        decoration: const InputDecoration(
+                        obscureText: !_isPasswordVisible,
+                        decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock),
-                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
+                          prefixIcon: const Icon(Icons.lock),
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 25),
@@ -126,11 +145,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: isLoading ? null : () => login(context),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          child: isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text('Login', style: TextStyle(fontSize: 16)),
+                          child:
+                              isLoading
+                                  ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                  : const Text(
+                                    'Login',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
                         ),
                       ),
                       const SizedBox(height: 16),

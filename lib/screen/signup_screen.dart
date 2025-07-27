@@ -17,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final phoneCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   bool isLoading = false;
+  bool _isPasswordVisible = false;
 
   void signup() async {
     if (nameCtrl.text.isEmpty ||
@@ -43,7 +44,7 @@ class _SignupScreenState extends State<SignupScreen> {
       "name": nameCtrl.text,
       "email": emailCtrl.text,
       "phone": phoneCtrl.text,
-      "password": passwordCtrl.text
+      "password": passwordCtrl.text,
     });
 
     setState(() => isLoading = false);
@@ -53,7 +54,8 @@ class _SignupScreenState extends State<SignupScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => OtpVerificationScreen(email: emailCtrl.text)),
+          builder: (_) => OtpVerificationScreen(email: emailCtrl.text),
+        ),
       );
     } else {
       Fluttertoast.showToast(msg: '❌ Signup failed: ${response.body}');
@@ -72,24 +74,25 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 40),
 
             // ✅ Logo
-            Image.asset(
-              'assets/images/logo.png',
-              height: 120,
-            ),
+            Image.asset('assets/images/logo.png', height: 120),
             const SizedBox(height: 30),
 
             // ✅ Signup Form
             Card(
               elevation: 8,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
-                    Text('Create Account',
-                        style: theme.textTheme.headlineSmall!.copyWith(
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text(
+                      'Create Account',
+                      style: theme.textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
                     TextField(
@@ -123,14 +126,25 @@ class _SignupScreenState extends State<SignupScreen> {
                       keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 15),
-
                     TextField(
                       controller: passwordCtrl,
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      obscureText: !_isPasswordVisible,
+                      decoration: InputDecoration(
                         labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock),
-                        border: OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
+                        prefixIcon: const Icon(Icons.lock),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 25),
@@ -142,11 +156,18 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        child: isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('Sign Up', style: TextStyle(fontSize: 16)),
+                        child:
+                            isLoading
+                                ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                                : const Text(
+                                  'Sign Up',
+                                  style: TextStyle(fontSize: 16),
+                                ),
                       ),
                     ),
 
@@ -161,7 +182,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
                             );
                           },
                           child: Text(

@@ -57,13 +57,9 @@ class _VehicleListingCardState extends State<VehicleListingCard>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -100,282 +96,304 @@ class _VehicleListingCardState extends State<VehicleListingCard>
             onTapUp: _onTapUp,
             onTapCancel: _onTapCancel,
             child: Container(
+              margin: const EdgeInsets.symmetric(
+                vertical: 8,
+              ), // Add vertical space between cards
               decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.fromARGB(255, 255, 255, 255), // Light blue
+                    Color.fromARGB(255, 255, 255, 255), // Blue
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(16),
+                // border: Border.all(color: Colors.blueGrey.shade200, width: 2),
                 boxShadow: [
+                  // Main shadow (bottom right, dark)
                   BoxShadow(
-                    color: Colors.black.withOpacity(_isPressed ? 0.15 : 0.08),
-                    blurRadius: _isPressed ? 8 : 12,
-                    offset: Offset(0, _isPressed ? 2 : 4),
+                    color: Colors.black.withOpacity(0.18),
+                    blurRadius: 18,
+                    spreadRadius: 2,
+                    offset: const Offset(8, 8),
+                  ),
+                  // Highlight shadow (top left, light)
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.7),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                    offset: const Offset(-6, -6),
+                  ),
+                  // Optional: subtle colored shadow for depth
+                  BoxShadow(
+                    color: Colors.blueGrey.withOpacity(0.08),
+                    blurRadius: 24,
+                    spreadRadius: 4,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  children: [
-                    // Background Image
-                    AspectRatio(
-                      aspectRatio: 1.4,
-                      child: Image.network(
-                        widget.imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey[300],
-                          child: const Icon(
-                            Icons.directions_car,
-                            size: 60,
-                            color: Colors.grey,
-                          ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    children: [
+                      // Background Image
+                      AspectRatio(
+                        aspectRatio: 1.4,
+                        child: Image.network(
+                          widget.imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder:
+                              (context, error, stackTrace) => Container(
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.directions_car,
+                                  size: 60,
+                                  color: Colors.grey,
+                                ),
+                              ),
                         ),
                       ),
-                    ),
-                    
-                    // Gradient Overlay
-                    AspectRatio(
-                      aspectRatio: 1.4,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.7),
-                            ],
-                            stops: const [0.4, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Favorite Button
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: GestureDetector(
-                        onTap: widget.onFavorite,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(8),
+
+                      // Gradient Overlay
+                      AspectRatio(
+                        aspectRatio: 1.4,
+                        child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: widget.isFavorite ? Colors.red : Colors.grey[600],
-                            size: 20,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                              stops: const [0.4, 1.0],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    
-                    // Content Overlay
-                    Positioned(
-                      left: 16,
-                      right: 16,
-                      bottom: 16,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Vehicle Name and Year
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  '${widget.year} ${widget.name}',
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    shadows: [
-                                      Shadow(
-                                        offset: Offset(0, 1),
-                                        blurRadius: 2,
-                                        color: Colors.black54,
-                                      ),
-                                    ],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'EMI ${widget.emi}',
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          
-                          if (widget.variant.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.variant,
-                              style: TextStyle(
-                                color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.9),
-                                fontSize: 14,
-                                shadows: const [
-                                  Shadow(
-                                    offset: Offset(0, 1),
-                                    blurRadius: 2,
-                                    color: Colors.black54,
-                                  ),
-                                ],
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          
-                          const SizedBox(height: 8),
-                          
-                          // Price
-                          Text(
-                            '₹${widget.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              shadows: [
-                                Shadow(
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                  color: Colors.black54,
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          const SizedBox(height: 12),
-                          
-                          // Pills Row
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                _glassPill('${widget.kmDriven} km'),
-                                const SizedBox(width: 6),
-                                _glassPill(widget.fuelType),
-                                const SizedBox(width: 6),
-                                _glassPill(widget.transmission),
-                                const SizedBox(width: 6),
-                                _glassPill(widget.registration),
-                              ],
-                            ),
-                          ),
-                          
-                          const SizedBox(height: 8),
-                          
-                          // Location
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.location_on,
-                                color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.8),
-                                size: 14,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  widget.location,
-                                  style: TextStyle(
-                                    color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.9),
-                                    fontSize: 12,
-                                    shadows: const [
-                                      Shadow(
-                                        offset: Offset(0, 1),
-                                        blurRadius: 2,
-                                        color: Colors.black54,
-                                      ),
-                                    ],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          
-                          const SizedBox(height: 12),
-                          
-                          // Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
+
+                      // Favorite Button
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: GestureDetector(
+                          onTap: widget.onFavorite,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: widget.isAssured
-                                  ? Colors.green.withOpacity(0.9)
-                                  : Colors.grey.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.white.withOpacity(0.9),
+                              shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withOpacity(0.1),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.verified,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  widget.badgeText,
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                if (widget.badgeDescription.isNotEmpty) ...[
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '• ${widget.badgeDescription}',
-                                    style: const TextStyle(
-                                      color: Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ],
+                            child: Icon(
+                              widget.isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color:
+                                  widget.isFavorite
+                                      ? Colors.red
+                                      : Colors.grey[600],
+                              size: 20,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+
+                      // Content Overlay
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Vehicle Name and Year
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${widget.year} ${widget.name}',
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                      255,
+                                      255,
+                                      255,
+                                      255,
+                                    ).withOpacity(0.9),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'EMI ${widget.emi}',
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            if (widget.variant.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.variant,
+                                style: TextStyle(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    0,
+                                    0,
+                                    0,
+                                  ).withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+
+                            const SizedBox(height: 8),
+
+                            // Price
+                            Text(
+                              '₹${widget.price.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // Pills Row
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _glassPill('${widget.kmDriven} km'),
+                                  const SizedBox(width: 6),
+                                  _glassPill(widget.fuelType),
+                                  const SizedBox(width: 6),
+                                  _glassPill(widget.transmission),
+                                  const SizedBox(width: 6),
+                                  _glassPill(widget.registration),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // Location
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: const Color.fromARGB(
+                                    255,
+                                    0,
+                                    0,
+                                    0,
+                                  ).withOpacity(0.8),
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    widget.location,
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        0,
+                                        0,
+                                        0,
+                                      ).withOpacity(0.9),
+                                      fontSize: 12,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    widget.isAssured
+                                        ? Colors.green.withOpacity(0.9)
+                                        : Colors.purpleAccent.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.verified,
+                                    color: Colors.blue,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    widget.badgeText,
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  if (widget.badgeDescription.isNotEmpty) ...[
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '• ${widget.badgeDescription}',
+                                      style: const TextStyle(
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -389,12 +407,9 @@ class _VehicleListingCardState extends State<VehicleListingCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.2),
+        color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
       ),
       child: Text(
         text,
@@ -402,17 +417,8 @@ class _VehicleListingCardState extends State<VehicleListingCard>
           color: Color.fromARGB(255, 0, 0, 0),
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          shadows: [
-            // Shadow(
-            //   offset: Offset(0, 1),
-            //   blurRadius: 2,
-            //   color: Colors.black54,
-            // ),
-          ],
         ),
       ),
     );
   }
 }
-
-// Removed invalid extension operator on Widget
