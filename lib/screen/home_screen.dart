@@ -13,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool showProperty = true;
+  int _selectedIndex = 0; // 0: Property, 1: Vehicle, 2: Sell, 3: Favorites
 
   @override
   Widget build(BuildContext context) {
@@ -32,210 +33,118 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-          // Floating Sell Button at bottom right
+          // Footer Navigation Bar
           Positioned(
-            bottom: 85, // Position above toggle bar
-            right: 24,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.teal.shade400, Colors.teal.shade600],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.teal.shade200,
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: FloatingActionButton.extended(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SellDashboard(),
-                    ),
-                  );
-                },
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                icon: const Icon(Icons.add, color: Colors.white),
-                label: const Text(
-                  'Sell',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Full Width Toggle Bar at Bottom
-          Positioned(
-            bottom: 0, // Position at the very bottom of screen
+            bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              height: 80,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.teal.shade50, Colors.teal.shade100],
-                ),
+                color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.teal.shade200.withOpacity(0.4),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(25),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    icon: Icons.home_work,
+                    label: 'Property',
+                    isSelected: _selectedIndex == 0,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                        showProperty = true;
+                      });
+                    },
                   ),
-                  child: Stack(
-                    children: [
-                      // Animated Background
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 400),
-                        curve: Curves.easeInOutCubic,
-                        left:
-                            showProperty
-                                ? 10
-                                : MediaQuery.of(context).size.width / 2 - 10,
-                        top: 10,
-                        bottom: 10,
-                        width: MediaQuery.of(context).size.width / 2 - 30,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.teal.shade400,
-                                Colors.teal.shade600,
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.teal.shade300.withOpacity(0.6),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
+                  _buildNavItem(
+                    icon: Icons.directions_car,
+                    label: 'Vehicle',
+                    isSelected: _selectedIndex == 1,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                        showProperty = false;
+                      });
+                    },
+                  ),
+                  _buildNavItem(
+                    icon: Icons.add_circle,
+                    label: 'Sell',
+                    isSelected: _selectedIndex == 2,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SellDashboard(),
                         ),
-                      ),
-                      // Toggle Options
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => showProperty = true),
-                              child: Container(
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                                child: Center(
-                                  child: AnimatedDefaultTextStyle(
-                                    duration: const Duration(milliseconds: 300),
-                                    style: TextStyle(
-                                      color:
-                                          showProperty
-                                              ? Colors.white
-                                              : Colors.teal.shade700,
-                                      fontWeight:
-                                          showProperty
-                                              ? FontWeight.bold
-                                              : FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.home_work,
-                                          color:
-                                              showProperty
-                                                  ? Colors.white
-                                                  : Colors.teal.shade700,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text("Property"),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => showProperty = false),
-                              child: Container(
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                                child: Center(
-                                  child: AnimatedDefaultTextStyle(
-                                    duration: const Duration(milliseconds: 300),
-                                    style: TextStyle(
-                                      color:
-                                          !showProperty
-                                              ? Colors.white
-                                              : Colors.teal.shade700,
-                                      fontWeight:
-                                          !showProperty
-                                              ? FontWeight.bold
-                                              : FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.directions_car,
-                                          color:
-                                              !showProperty
-                                                  ? Colors.white
-                                                  : Colors.teal.shade700,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text("Vehicle"),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                ),
+                  _buildNavItem(
+                    icon: Icons.favorite,
+                    label: 'Favorites',
+                    isSelected: _selectedIndex == 3,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 3;
+                      });
+                      // TODO: Navigate to favorites screen
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Favorites screen coming soon!'),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isSelected ? Colors.teal : Colors.grey[600],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.teal : Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
