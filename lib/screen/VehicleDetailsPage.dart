@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:trexo/services/liked_vehicles_service.dart';
 
 class VehicleDetailsPage extends StatefulWidget {
   final Map<String, dynamic> vehicle;
@@ -19,6 +22,14 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   bool _isFavorite = false;
+  final LikedVehiclesService _likedService = LikedVehiclesService();
+
+  // EMI Calculator variables
+  double _loanAmount = 0;
+  double _downPayment = 0;
+  int _loanTenure = 36; // months
+  double _interestRate = 10.5; // percentage
+  double _calculatedEMI = 0;
 
   @override
   void initState() {
@@ -44,9 +55,61 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
       CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
     );
 
+    // Check if vehicle is already liked
+    _checkIfVehicleLiked();
+
+    // Initialize EMI calculation
+    _initializeEMICalculation();
+
     // Start animations
     _fadeController.forward();
     _slideController.forward();
+  }
+
+  void _initializeEMICalculation() {
+    final vehiclePrice = widget.vehicle['price'] ?? 0;
+    _downPayment = vehiclePrice * 0.2; // 20% down payment
+    _loanAmount = vehiclePrice - _downPayment;
+    _calculateEMI();
+  }
+
+  void _calculateEMI() {
+    if (_loanAmount <= 0 || _loanTenure <= 0 || _interestRate <= 0) {
+      _calculatedEMI = 0;
+      return;
+    }
+
+    double monthlyRate = _interestRate / (12 * 100);
+    double emi =
+        (_loanAmount * monthlyRate * pow(1 + monthlyRate, _loanTenure)) /
+        (pow(1 + monthlyRate, _loanTenure) - 1);
+
+    setState(() {
+      _calculatedEMI = emi;
+    });
+  }
+
+  void _showEMICalculator() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: true,
+      isDismissible: true,
+      builder:
+          (context) => GestureDetector(
+            onTap: () {}, // Prevent dismissal when tapping inside
+            child: _buildEMICalculatorBottomSheet(),
+          ),
+    );
+  }
+
+  void _checkIfVehicleLiked() async {
+    final vehicleId = widget.vehicle['id'] ?? widget.vehicle['name'] ?? '';
+    final isLiked = await _likedService.isVehicleLiked(vehicleId);
+    setState(() {
+      _isFavorite = isLiked;
+    });
   }
 
   @override
@@ -111,10 +174,67 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
                       key: ValueKey(_isFavorite),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
                       _isFavorite = !_isFavorite;
                     });
+
+                    final vehicleId =
+                        widget.vehicle['id'] ?? widget.vehicle['name'] ?? '';
+
+                    if (_isFavorite) {
+                      // Add to favorites
+                      final success = await _likedService.addLikedVehicle(
+                        widget.vehicle,
+                      );
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Added to favorites'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      } else {
+                        // Revert state if failed
+                        setState(() {
+                          _isFavorite = false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Failed to add to favorites'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    } else {
+                      // Remove from favorites
+                      final success = await _likedService.removeLikedVehicle(
+                        vehicleId,
+                      );
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Removed from favorites'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      } else {
+                        // Revert state if failed
+                        setState(() {
+                          _isFavorite = true;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Failed to remove from favorites'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
               ),
@@ -361,7 +481,7 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       Text(
-                        "₹16,326/month",
+                        "₹${NumberFormat('#,##,000').format(_calculatedEMI)}/month",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -385,7 +505,7 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
                   ),
                   icon: const Icon(Icons.calculate, size: 18),
                   label: const Text("Calculate EMI"),
-                  onPressed: () {},
+                  onPressed: _showEMICalculator,
                 ),
               ],
             ),
@@ -819,6 +939,364 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEMICalculatorBottomSheet() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            height: 4,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'EMI Calculator',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Vehicle Price
+                  _buildEMIInputCard(
+                    'Vehicle Price',
+                    '₹${NumberFormat('#,##,000').format(widget.vehicle['price'])}',
+                    null,
+                    false,
+                  ),
+
+                  // Down Payment
+                  _buildEMIInputCard(
+                    'Down Payment',
+                    '₹${NumberFormat('#,##,000').format(_downPayment)}',
+                    (value) {
+                      setState(() {
+                        _downPayment =
+                            double.tryParse(value.replaceAll(',', '')) ?? 0;
+                        _loanAmount =
+                            (widget.vehicle['price'] ?? 0) - _downPayment;
+                        _calculateEMI();
+                      });
+                    },
+                    true,
+                  ),
+
+                  // Loan Amount
+                  _buildEMIInputCard(
+                    'Loan Amount',
+                    '₹${NumberFormat('#,##,000').format(_loanAmount)}',
+                    null,
+                    false,
+                  ),
+
+                  // Interest Rate
+                  _buildSliderCard(
+                    'Interest Rate',
+                    '${_interestRate.toStringAsFixed(1)}%',
+                    _interestRate,
+                    5.0,
+                    20.0,
+                    (value) {
+                      setState(() {
+                        _interestRate = value;
+                        _calculateEMI();
+                      });
+                    },
+                  ),
+
+                  // Loan Tenure
+                  _buildSliderCard(
+                    'Loan Tenure',
+                    '$_loanTenure months (${(_loanTenure / 12).toStringAsFixed(1)} years)',
+                    _loanTenure.toDouble(),
+                    12.0,
+                    84.0,
+                    (value) {
+                      setState(() {
+                        _loanTenure = value.round();
+                        _calculateEMI();
+                      });
+                    },
+                  ),
+
+                  // EMI Result
+                  Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.purple[50]!, Colors.purple[100]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.purple[200]!),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Monthly EMI',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              '₹${NumberFormat('#,##,000').format(_calculatedEMI)}',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildEMIDetail(
+                              'Total Interest',
+                              '₹${NumberFormat('#,##,000').format((_calculatedEMI * _loanTenure) - _loanAmount)}',
+                            ),
+                            _buildEMIDetail(
+                              'Total Amount',
+                              '₹${NumberFormat('#,##,000').format(_calculatedEMI * _loanTenure)}',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 100),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEMIInputCard(
+    String title,
+    String value,
+    Function(String)? onChanged,
+    bool isEditable,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          isEditable
+              ? TextFormField(
+                initialValue: value.replaceAll('₹', '').replaceAll(',', ''),
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  prefixText: '₹',
+                  isDense: true,
+                ),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                onChanged: onChanged,
+              )
+              : Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSliderCard(
+    String title,
+    String value,
+    double currentValue,
+    double min,
+    double max,
+    Function(double) onChanged,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.purple[600],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 40, // Fixed height to ensure slider is touchable
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: Colors.purple[600],
+                inactiveTrackColor: Colors.grey[300],
+                thumbColor: Colors.purple[600],
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+                overlayColor: Colors.purple[600]!.withOpacity(0.2),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+                trackHeight: 6,
+                valueIndicatorColor: Colors.purple[600],
+                valueIndicatorTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: Slider(
+                value: currentValue.clamp(min, max),
+                min: min,
+                max: max,
+                divisions: title.contains('Rate') ? 30 : (max - min).round(),
+                label: value,
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title.contains('Rate')
+                    ? '${min.toStringAsFixed(1)}%'
+                    : '${min.round()} months',
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+              Text(
+                title.contains('Rate')
+                    ? '${max.toStringAsFixed(1)}%'
+                    : '${max.round()} months',
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEMIDetail(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
     );
   }
 }

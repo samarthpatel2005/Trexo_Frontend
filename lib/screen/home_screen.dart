@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trexo/screen/ViewPropertyScreen.dart';
 import 'package:trexo/screen/ViewVehicleScreen.dart';
+import 'package:trexo/screen/liked_vehicles.dart';
 import 'package:trexo/screen/sell_dashboard.dart';
 import 'package:trexo/widget/ResponsiveScaffold.dart';
 
@@ -12,8 +13,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  bool showProperty = true;
   int _selectedIndex = 0; // 0: Property, 1: Vehicle, 2: Sell, 3: Favorites
+
+  Widget _getCurrentScreen() {
+    switch (_selectedIndex) {
+      case 0:
+        return const ViewPropertyScreen();
+      case 1:
+        return const ViewVehicleScreen();
+      case 2:
+        return const SellDashboard();
+      case 3:
+        return const LikedVehiclesPage();
+      default:
+        return const ViewPropertyScreen();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +39,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               const SizedBox(height: 20),
 
-              // Show content
+              // Show content with bottom padding for footer
               Expanded(
-                child:
-                    showProperty
-                        ? const ViewPropertyScreen()
-                        : const ViewVehicleScreen(),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80), // Footer height
+                  child: _getCurrentScreen(),
+                ),
               ),
             ],
           ),
@@ -60,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     onTap: () {
                       setState(() {
                         _selectedIndex = 0;
-                        showProperty = true;
                       });
                     },
                   ),
@@ -71,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     onTap: () {
                       setState(() {
                         _selectedIndex = 1;
-                        showProperty = false;
                       });
                     },
                   ),
@@ -83,12 +96,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       setState(() {
                         _selectedIndex = 2;
                       });
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SellDashboard(),
-                        ),
-                      );
                     },
                   ),
                   _buildNavItem(
@@ -99,12 +106,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       setState(() {
                         _selectedIndex = 3;
                       });
-                      // TODO: Navigate to favorites screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Favorites screen coming soon!'),
-                        ),
-                      );
                     },
                   ),
                 ],

@@ -58,7 +58,6 @@ class _ViewVehicleScreenState extends State<ViewVehicleScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("View Vehicles")),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())

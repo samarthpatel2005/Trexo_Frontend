@@ -49,7 +49,6 @@ class _ViewPropertyScreenState extends State<ViewPropertyScreen> {
     final aspectRatio = crossAxisCount == 1 ? 1.1 : 0.75;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("View Properties")),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())

@@ -10,16 +10,6 @@ class SellDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back,color: Colors.white,),
-          onPressed: () {
-            Navigator.popUntil(context, ModalRoute.withName('/home'));
-          },
-        ),
-        title: const Text('Admin Panel',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
-        backgroundColor: Colors.blue,
-      ),
       drawer: const AdminDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24),
