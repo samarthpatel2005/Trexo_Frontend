@@ -447,101 +447,38 @@ class _SimpleHeaderState extends State<SimpleHeader>
                     child: AnimatedOpacity(
                       opacity: isMobile ? (1.0 - _animation.value) : 1.0,
                       duration: const Duration(milliseconds: 300),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: 80,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                ],
-
-                // Spacer
-                const Spacer(),
-
-                // Desktop: search + nav buttons
-                if (!isMobile) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SizedBox(
-                      width: 250,
-                      child: TextField(
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Search vehicles & properties...',
-                          hintStyle: const TextStyle(color: Colors.white70),
-                          filled: true,
-                          fillColor: Colors.blue[700],
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
-                          ),
-                          prefixIcon:
-                              _isSearching
-                                  ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    ),
-                                  )
-                                  : const Icon(
-                                    Icons.search,
-                                    color: Colors.white,
-                                  ),
+                      child: CircleAvatar(
+                        // radius: 40,
+                        backgroundColor:
+                            Colors.white, // white circular background
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 60, // a bit smaller than diameter (radius * 2)
+                          height: 60,
+                          fit: BoxFit.contain, // show full logo inside circle
                         ),
-                        onSubmitted: _onSearchSubmitted,
                       ),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/about'),
-                    child: const Text(
-                      "About",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/profile'),
-                    child: const Text(
-                      "Profile",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                ],
 
-                // Mobile: expandable search + menu
-                if (isMobile) ...[
-                  // Expanded search bar
-                  if (_isSearchExpanded) ...[
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                  // Spacer
+                  const Spacer(),
+
+                  // Desktop: search + nav buttons
+                  if (!isMobile) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: SizedBox(
+                        width: 250,
                         child: TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          style: const TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: 'Search vehicles & properties...',
-                            hintStyle: const TextStyle(color: Colors.black),
+                            hintStyle: const TextStyle(color: Colors.white70),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.blue[700],
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 8,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
@@ -558,44 +495,113 @@ class _SimpleHeaderState extends State<SimpleHeader>
                                           strokeWidth: 2,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                Colors.blue,
+                                                Colors.white,
                                               ),
                                         ),
                                       ),
                                     )
                                     : const Icon(
                                       Icons.search,
-                                      color: Colors.black,
+                                      color: Colors.white,
                                     ),
-                            suffixIcon: IconButton(
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.black,
-                              ),
-                              onPressed: _toggleSearch,
-                            ),
                           ),
                           onSubmitted: _onSearchSubmitted,
                         ),
                       ),
                     ),
-                  ] else ...[
-                    // Search icon
-                    IconButton(
-                      icon: const Icon(Icons.search, color: Colors.white),
-                      onPressed: _toggleSearch,
-                    ),
-                    // Menu icon
-                    Builder(
-                      builder:
-                          (context) => IconButton(
-                            icon: const Icon(Icons.menu, color: Colors.white),
-                            onPressed: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                          ),
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, '/about'),
+                      child: const Text(
+                        "About",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                     const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, '/profile'),
+                      child: const Text(
+                        "Profile",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+
+                  // Mobile: expandable search + menu
+                  if (isMobile) ...[
+                    // Expanded search bar
+                    if (_isSearchExpanded) ...[
+                      Expanded(
+                        child: Container(
+                          height: 40,
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          child: TextField(
+                            controller: _searchController,
+                            autofocus: true,
+                            style: const TextStyle(color: Colors.black),
+                            decoration: InputDecoration(
+                              hintText: 'Search vehicles & properties...',
+                              hintStyle: const TextStyle(color: Colors.black),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              prefixIcon:
+                                  _isSearching
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8),
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.blue,
+                                                ),
+                                          ),
+                                        ),
+                                      )
+                                      : const Icon(
+                                        Icons.search,
+                                        color: Colors.black,
+                                      ),
+                              suffixIcon: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.black,
+                                ),
+                                onPressed: _toggleSearch,
+                              ),
+                            ),
+                            onSubmitted: _onSearchSubmitted,
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      // Search icon
+                      IconButton(
+                        icon: const Icon(Icons.search, color: Colors.white),
+                        onPressed: _toggleSearch,
+                      ),
+                      // Menu icon
+                      Builder(
+                        builder:
+                            (context) => IconButton(
+                              icon: const Icon(Icons.menu, color: Colors.white),
+                              onPressed: () {
+                                Scaffold.of(context).openDrawer();
+                              },
+                            ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                   ],
                 ],
               ],

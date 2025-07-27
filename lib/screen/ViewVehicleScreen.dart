@@ -86,10 +86,10 @@ class _ViewVehicleScreenState extends State<ViewVehicleScreen> {
                     variant: item['model'] ?? '',
                     price: (item['price'] ?? 0).toDouble(),
                     emi: item['emi'] ?? 'N/A',
-                    km: item['km'] ?? '0 km',
+                    kmDriven: item['kmDriven']?.toString() ?? '0',
                     fuelType: item['fuelType'] ?? 'Petrol',
                     transmission: item['transmission'] ?? 'Manual',
-                    registration: item['registration'] ?? 'GJ',
+                    registration: item['rto'] ?? 'GJ',
                     location: item['location'] ?? 'Unknown',
                     badgeText: item['assured'] == true ? 'Assured' : 'Verified',
                     badgeDescription:

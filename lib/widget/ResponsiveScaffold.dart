@@ -67,7 +67,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                           const CircleAvatar(
                             radius: 30,
                             backgroundImage: AssetImage(
-                              'assets/images/logocopy-modified.png',
+                              'assets/images/logo.png',
                             ),
                           ),
                           const SizedBox(height: 10),
