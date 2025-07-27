@@ -13,20 +13,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  int _selectedIndex = 0; // 0: Property, 1: Vehicle, 2: Sell, 3: Favorites
+  int _selectedIndex = 0; // 0: Vehicle, 1: Property, 2: Sell, 3: Favorites
 
   Widget _getCurrentScreen() {
     switch (_selectedIndex) {
       case 0:
-        return const ViewPropertyScreen();
-      case 1:
         return const ViewVehicleScreen();
+      case 1:
+        return const ViewPropertyScreen();
       case 2:
         return const SellDashboard();
       case 3:
         return const LikedVehiclesPage();
       default:
-        return const ViewPropertyScreen();
+        return const ViewVehicleScreen();
     }
   }
 
@@ -39,13 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               const SizedBox(height: 20),
 
-              // Show content with bottom padding for footer
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 80), // Footer height
-                  child: _getCurrentScreen(),
-                ),
-              ),
+              // Show content
+              Expanded(child: _getCurrentScreen()),
             ],
           ),
           // Footer Navigation Bar
@@ -69,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildNavItem(
-                    icon: Icons.home_work,
-                    label: 'Property',
+                    icon: Icons.directions_car,
+                    label: 'Vehicle',
                     isSelected: _selectedIndex == 0,
                     onTap: () {
                       setState(() {
@@ -79,8 +74,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     },
                   ),
                   _buildNavItem(
-                    icon: Icons.directions_car,
-                    label: 'Vehicle',
+                    icon: Icons.home_work,
+                    label: 'Property',
                     isSelected: _selectedIndex == 1,
                     onTap: () {
                       setState(() {

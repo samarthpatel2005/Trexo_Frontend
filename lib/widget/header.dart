@@ -423,7 +423,15 @@ class _SimpleHeaderState extends State<SimpleHeader>
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.blue,
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF0D47A1), 
+            Color(0xFF1565C0), // Professional deep blue
+        // Darker professional blue
+          ],
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
