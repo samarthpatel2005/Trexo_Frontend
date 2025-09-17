@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trexo/services/sell.dart';
+import 'package:trexo/widget/image_picker_widget.dart';
 
 class AddVehicleScreen extends StatefulWidget {
   const AddVehicleScreen({super.key});
@@ -56,7 +58,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen>
     'Other',
   ];
 
-  final List<TextEditingController> imageUrlControllers = [];
+  List<File> selectedImages = []; // Add this line for image picker
   final List<String> vehicleTypes = ['Car', 'Bike', 'Truck', 'Van', 'Other'];
   String selectedType = 'Car';
 
@@ -96,23 +98,6 @@ class _AddVehicleScreenState extends State<AddVehicleScreen>
     return 32;
   }
 
-  void addImageUrlField() {
-    if (imageUrlControllers.length >= 5) {
-      _showSnackBar('⚠️ Maximum 5 image URLs allowed', Colors.orange);
-      return;
-    }
-    setState(() {
-      imageUrlControllers.add(TextEditingController());
-    });
-  }
-
-  void removeImageUrlField(int index) {
-    setState(() {
-      imageUrlControllers[index].dispose();
-      imageUrlControllers.removeAt(index);
-    });
-  }
-
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -141,16 +126,18 @@ class _AddVehicleScreenState extends State<AddVehicleScreen>
         return;
       }
 
+      // Check if at least one image is selected
+      if (selectedImages.isEmpty) {
+        _showSnackBar('⚠️ Please select at least one image', Colors.red);
+        setState(() => isLoading = false);
+        return;
+      }
+
       final vehicleData = {
         "name": nameCtrl.text.trim(),
         "model": selectedType,
         "price": double.tryParse(priceCtrl.text.trim()) ?? 0,
         "description": descriptionCtrl.text.trim(),
-        "imageUrls":
-            imageUrlControllers
-                .map((ctrl) => ctrl.text.trim())
-                .where((url) => url.isNotEmpty)
-                .toList(),
         "tags": [selectedType],
         "fuelType": fuelType,
         "transmission": transmission,
@@ -166,7 +153,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen>
         "location": locationCtrl.text.trim(),
       };
 
-      final res = await AdminService.addVehicle(vehicleData, token);
+      final res = await AdminService.addVehicle(vehicleData, token, selectedImages);
 
       if (res.statusCode == 201) {
         _showSnackBar('✅ Vehicle added successfully!', Colors.green);
@@ -284,115 +271,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen>
     );
   }
 
-  Widget buildImageUrlSection(double screenWidth) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.photo_library, color: Colors.blue.shade700),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Vehicle Images",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton.icon(
-                  onPressed: addImageUrlField,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(isMobile(screenWidth) ? "Add" : "Add Image"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade700,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (imageUrlControllers.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.photo, size: 40, color: Colors.grey.shade500),
-                      const SizedBox(height: 8),
-                      Text(
-                        "No images added yet",
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Click 'Add Image' to add vehicle photos",
-                        style: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              ...imageUrlControllers.asMap().entries.map((entry) {
-                int index = entry.key;
-                TextEditingController controller = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: buildTextField(
-                          controller: controller,
-                          label: "Image URL ${index + 1}",
-                          hint: "Enter image URL",
-                          icon: Icons.link,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: () => removeImageUrlField(index),
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        tooltip: "Remove image",
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -920,8 +801,17 @@ class _AddVehicleScreenState extends State<AddVehicleScreen>
 
                     const SizedBox(height: 20),
 
-                    // Image URL Section
-                    buildImageUrlSection(screenWidth),
+                    // Image Picker Section
+                    ImagePickerWidget(
+                      selectedImages: selectedImages,
+                      onImagesChanged: (images) {
+                        setState(() {
+                          selectedImages = images;
+                        });
+                      },
+                      title: "Vehicle Images",
+                      maxImages: 5,
+                    ),
                     const SizedBox(height: 24),
 
                     // Insurance Switch & Submit Button

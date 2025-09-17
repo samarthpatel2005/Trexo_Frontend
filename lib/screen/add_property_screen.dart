@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trexo/services/sell.dart';
+import 'package:trexo/widget/image_picker_widget.dart';
 
 class AddPropertyScreen extends StatefulWidget {
   const AddPropertyScreen({super.key});
@@ -21,7 +23,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   final sizeCtrl = TextEditingController();
   final roomsCtrl = TextEditingController();
   final typeCtrl = TextEditingController();
-  final List<TextEditingController> imageUrlControllers = [];
+  List<File> selectedImages = []; // Replace imageUrlControllers with selectedImages
 
   bool _isLoading = false;
   String? _selectedPropertyType;
@@ -40,37 +42,6 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   @override
   void initState() {
     super.initState();
-    // Add one image URL field by default
-    imageUrlControllers.add(TextEditingController());
-  }
-
-  void addImageUrlField() {
-    if (imageUrlControllers.length >= 5) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.warning, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Maximum 5 image URLs allowed'),
-            ],
-          ),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-    setState(() {
-      imageUrlControllers.add(TextEditingController());
-    });
-  }
-
-  void removeImageUrlField(int index) {
-    setState(() {
-      imageUrlControllers[index].dispose();
-      imageUrlControllers.removeAt(index);
-    });
   }
 
   Future<void> submitProperty() async {
@@ -91,16 +62,20 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
       return;
     }
 
+    // Check if at least one image is selected
+    if (selectedImages.isEmpty) {
+      Fluttertoast.showToast(msg: '⚠️ Please select at least one image');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     final propertyData = {
       "title": titleCtrl.text.trim(),
       "price": double.tryParse(priceCtrl.text.trim()) ?? 0,
       "location": locationCtrl.text.trim(),
       "description": descCtrl.text.trim(),
-      "imageUrls":
-          imageUrlControllers
-              .map((ctrl) => ctrl.text.trim())
-              .where((url) => url.isNotEmpty)
-              .toList(),
       "tags": [locationCtrl.text.trim()],
       "extraInfo": {
         "size": sizeCtrl.text.trim(),
@@ -110,7 +85,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     };
 
     try {
-      final res = await AdminService.addProperty(propertyData, token);
+      final res = await AdminService.addProperty(propertyData, token, selectedImages);
 
       if (res.statusCode == 201) {
         Fluttertoast.showToast(msg: '✅ Property added successfully!');
@@ -226,77 +201,15 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Property Images",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              ElevatedButton.icon(
-                onPressed: addImageUrlField,
-                icon: const Icon(Icons.add_photo_alternate),
-                label: const Text("Add Image"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Add up to 5 image URLs to showcase your property",
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-          ),
-          const SizedBox(height: 16),
-          ...List.generate(imageUrlControllers.length, (index) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: imageUrlControllers[index],
-                      decoration: InputDecoration(
-                        labelText: "Image URL ${index + 1}",
-                        hintText: "https://example.com/image.jpg",
-                        prefixIcon: const Icon(Icons.image),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (!Uri.tryParse(value)!.hasAbsolutePath == true) {
-                            return 'Please enter a valid URL';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () => removeImageUrlField(index),
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: "Remove image",
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
+      child: ImagePickerWidget(
+        selectedImages: selectedImages,
+        onImagesChanged: (images) {
+          setState(() {
+            selectedImages = images;
+          });
+        },
+        title: "Property Images",
+        maxImages: 5,
       ),
     );
   }
@@ -635,9 +548,6 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     sizeCtrl.dispose();
     roomsCtrl.dispose();
     typeCtrl.dispose();
-    for (var controller in imageUrlControllers) {
-      controller.dispose();
-    }
     super.dispose();
   }
 }
