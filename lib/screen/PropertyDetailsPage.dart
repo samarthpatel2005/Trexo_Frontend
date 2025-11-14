@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class PropertyDetailsPage extends StatefulWidget {
   final Map<String, dynamic> property;
@@ -34,7 +37,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 _buildHeaderSection(),
                 _buildPriceSection(),
                 _buildOverviewSection(),
-                _buildAmenitiesSection(),
                 _buildDescriptionSection(),
                 _buildLocationSection(),
                 const SizedBox(height: 100),
@@ -122,29 +124,30 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             borderRadius: BorderRadius.circular(20),
             child: CarouselSlider(
               carouselController: _carouselController,
-              items: images.map<Widget>((url) {
-                return Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      url,
-                      fit: BoxFit.cover,
+              items:
+                  images.map<Widget>((url) {
+                    return Container(
                       width: double.infinity,
-                    ),
-                  ),
-                );
-              }).toList(),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        ),
+                      ),
+                    );
+                  }).toList(),
               options: CarouselOptions(
                 height: 280,
                 viewportFraction: 1.0,
@@ -166,7 +169,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               bottom: 0,
               child: Center(
                 child: GestureDetector(
-                  onTap: () => _carouselController.animateToPage(_currentImageIndex - 1),
+                  onTap:
+                      () => _carouselController.animateToPage(
+                        _currentImageIndex - 1,
+                      ),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -197,7 +203,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               bottom: 0,
               child: Center(
                 child: GestureDetector(
-                  onTap: () => _carouselController.animateToPage(_currentImageIndex + 1),
+                  onTap:
+                      () => _carouselController.animateToPage(
+                        _currentImageIndex + 1,
+                      ),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -228,19 +237,21 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               right: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: images.asMap().entries.map((entry) {
-                  return Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentImageIndex == entry.key
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.4),
-                    ),
-                  );
-                }).toList(),
+                children:
+                    images.asMap().entries.map((entry) {
+                      return Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              _currentImageIndex == entry.key
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.4),
+                        ),
+                      );
+                    }).toList(),
               ),
             ),
         ],
@@ -287,10 +298,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               Expanded(
                 child: Text(
                   widget.property['location'] ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
               ),
             ],
@@ -382,13 +390,64 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Widget _buildOverviewGrid() {
+    // Parse extraInfo - it might come as a string or map
+    Map<String, dynamic>? extraInfo;
+    final extraInfoRaw = widget.property['extraInfo'];
+
+    print('DEBUG - Full property data: ${widget.property}');
+    print('DEBUG - extraInfoRaw type: ${extraInfoRaw.runtimeType}');
+    print('DEBUG - extraInfoRaw value: $extraInfoRaw');
+
+    if (extraInfoRaw is String) {
+      try {
+        // Remove curly braces if it's formatted like "{size: ..., rooms: ..., type: ...}"
+        String cleanedString = extraInfoRaw.trim();
+        if (cleanedString.startsWith('{') && cleanedString.endsWith('}')) {
+          // This is not valid JSON, it's a toString() output
+          // Try to parse it manually
+          cleanedString = cleanedString.substring(1, cleanedString.length - 1);
+          final parts = cleanedString.split(',');
+          extraInfo = {};
+          for (var part in parts) {
+            final keyValue = part.split(':');
+            if (keyValue.length == 2) {
+              final key = keyValue[0].trim();
+              final value = keyValue[1].trim();
+              extraInfo[key] = value;
+            }
+          }
+        } else {
+          // Try normal JSON parsing
+          extraInfo = jsonDecode(extraInfoRaw) as Map<String, dynamic>?;
+        }
+      } catch (e) {
+        print('Error parsing extraInfo: $e');
+        extraInfo = null;
+      }
+    } else if (extraInfoRaw is Map<String, dynamic>) {
+      extraInfo = extraInfoRaw;
+    } else if (extraInfoRaw is Map) {
+      extraInfo = Map<String, dynamic>.from(extraInfoRaw);
+    }
+
+    print('DEBUG - Parsed extraInfo: $extraInfo');
+
     final overviewData = [
-      {'icon': Icons.home_work_rounded, 'title': 'Type', 'value': widget.property['type']},
-      {'icon': Icons.square_foot_rounded, 'title': 'Area', 'value': widget.property['area']},
-      {'icon': Icons.bed_rounded, 'title': 'Bedrooms', 'value': widget.property['bedrooms']?.toString()},
-      {'icon': Icons.bathtub_rounded, 'title': 'Bathrooms', 'value': widget.property['bathrooms']?.toString()},
-      {'icon': Icons.chair_rounded, 'title': 'Furnishing', 'value': widget.property['furnishing']},
-      {'icon': Icons.info_rounded, 'title': 'Status', 'value': widget.property['status']},
+      {
+        'icon': Icons.home_work_rounded,
+        'title': 'Type',
+        'value': extraInfo?['type']?.toString(),
+      },
+      {
+        'icon': Icons.square_foot_rounded,
+        'title': 'Size',
+        'value': extraInfo?['size']?.toString(),
+      },
+      {
+        'icon': Icons.bed_rounded,
+        'title': 'Rooms',
+        'value': extraInfo?['rooms']?.toString(),
+      },
     ];
 
     return GridView.builder(
@@ -398,7 +457,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 2.5,
+        childAspectRatio: 2.2,
       ),
       itemCount: overviewData.length,
       itemBuilder: (context, index) {
@@ -451,75 +510,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  Widget _buildAmenitiesSection() {
-    final amenities = [
-      'Swimming Pool', 'Gym', 'Parking', 'Security', 'Garden', 'Elevator'
-    ];
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Amenities",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: amenities.map((amenity) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.green[200]!),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.check_circle_rounded,
-                      size: 16,
-                      color: Colors.green[600],
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      amenity,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.green[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDescriptionSection() {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -548,8 +538,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            widget.property['description'] ?? 
-            "This beautiful property offers modern living with excellent amenities and a prime location. Perfect for families looking for comfort and convenience.",
+            widget.property['description'] ?? "No description available",
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[700],
@@ -562,6 +551,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Widget _buildLocationSection() {
+    final location = widget.property['location'] ?? '';
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.all(24),
@@ -588,27 +579,72 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+          InkWell(
+            onTap: () => _openGoogleMaps(location),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.blue[50]!, Colors.indigo[50]!],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.blue[200]!, width: 2),
+              ),
+              child: Stack(
                 children: [
-                  Icon(
-                    Icons.map_rounded,
-                    size: 48,
-                    color: Colors.grey[600],
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.map_rounded,
+                          size: 64,
+                          color: Colors.indigo[600],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "View on Google Maps",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.indigo[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          location,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Map View",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.open_in_new,
+                        size: 20,
+                        color: Colors.indigo[600],
+                      ),
                     ),
                   ),
                 ],
@@ -618,6 +654,52 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _openGoogleMaps(String location) async {
+    if (location.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final encodedLocation = Uri.encodeComponent(location);
+    final googleMapsUrl = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$encodedLocation',
+    );
+
+    try {
+      // Try to open in a maps app or browser. If plugin isn't registered
+      // this will throw; we'll catch and show a helpful message.
+      await url_launcher.launchUrl(googleMapsUrl);
+    } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('MissingPluginException')) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Maps launcher plugin not registered. Stop and rebuild the app.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error opening maps: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildBottomSheet() {

@@ -185,20 +185,22 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: widget.searchType == 'vehicle' 
-            ? 'Search vehicles by name, model, location...'
-            : 'Search properties by title, location, description...',
+          hintText:
+              widget.searchType == 'vehicle'
+                  ? 'Search vehicles by name, model, location...'
+                  : 'Search properties by title, location, description...',
           hintStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: _isSearching
-            ? const Padding(
-                padding: EdgeInsets.all(12),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-            : const Icon(Icons.search, color: Colors.blue),
+          prefixIcon:
+              _isSearching
+                  ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                  : const Icon(Icons.search, color: Colors.blue),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -244,7 +246,9 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.7,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -257,62 +261,76 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Icon(Icons.tune, color: Colors.blue[700]),
-              const SizedBox(width: 8),
-              Text(
-                'Filters',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+          // Fixed header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(Icons.tune, color: Colors.blue[700]),
+                const SizedBox(width: 8),
+                Text(
+                  'Filters',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
                 ),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: _clearFilters,
-                child: const Text('Clear All'),
-              ),
-            ],
+                const Spacer(),
+                TextButton(
+                  onPressed: _clearFilters,
+                  child: const Text('Clear All'),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          
-          // Common filters
-          _buildPriceRangeFilter(),
-          const SizedBox(height: 16),
-          _buildLocationFilter(),
-          const SizedBox(height: 16),
-          _buildSortFilter(),
-          
-          // Vehicle specific filters
-          if (widget.searchType == 'vehicle') ...[
-            const SizedBox(height: 16),
-            _buildVehicleFilters(),
-          ],
-          
-          // Property specific filters
-          if (widget.searchType == 'property') ...[
-            const SizedBox(height: 16),
-            _buildPropertyFilters(),
-          ],
-          
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _performSearch,
-              icon: const Icon(Icons.search),
-              label: const Text('Apply Filters'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[700],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+
+          // Scrollable content
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Common filters
+                  _buildPriceRangeFilter(),
+                  const SizedBox(height: 16),
+                  _buildLocationFilter(),
+                  const SizedBox(height: 16),
+                  _buildSortFilter(),
+
+                  // Vehicle specific filters
+                  if (widget.searchType == 'vehicle') ...[
+                    const SizedBox(height: 16),
+                    _buildVehicleFilters(),
+                  ],
+
+                  // Property specific filters
+                  if (widget.searchType == 'property') ...[
+                    const SizedBox(height: 16),
+                    _buildPropertyFilters(),
+                  ],
+
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _performSearch,
+                      icon: const Icon(Icons.search),
+                      label: const Text('Apply Filters'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[700],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -395,21 +413,17 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
         DropdownButtonFormField<String>(
           value: _selectedLocation,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 8,
             ),
           ),
           hint: const Text('Select Location'),
-          items: _locations.map((location) {
-            return DropdownMenuItem(
-              value: location,
-              child: Text(location),
-            );
-          }).toList(),
+          items:
+              _locations.map((location) {
+                return DropdownMenuItem(value: location, child: Text(location));
+              }).toList(),
           onChanged: (value) {
             setState(() {
               _selectedLocation = value == 'All' ? null : value;
@@ -421,21 +435,22 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
   }
 
   Widget _buildSortFilter() {
-    final sortOptions = widget.searchType == 'vehicle'
-      ? [
-          'Price: Low to High',
-          'Price: High to Low',
-          'Year: Newest First',
-          'Year: Oldest First',
-          'KM: Low to High',
-        ]
-      : [
-          'Price: Low to High',
-          'Price: High to Low',
-          'Newest First',
-          'Area: Large to Small',
-          'Bedrooms: High to Low',
-        ];
+    final sortOptions =
+        widget.searchType == 'vehicle'
+            ? [
+              'Price: Low to High',
+              'Price: High to Low',
+              'Year: Newest First',
+              'Year: Oldest First',
+              'KM: Low to High',
+            ]
+            : [
+              'Price: Low to High',
+              'Price: High to Low',
+              'Newest First',
+              'Area: Large to Small',
+              'Bedrooms: High to Low',
+            ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,50 +466,46 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
         DropdownButtonFormField<String>(
           value: _sortBy,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 8,
             ),
           ),
           hint: const Text('Select Sort Order'),
-          items: sortOptions.map((option) {
-            String value;
-            switch (option) {
-              case 'Price: Low to High':
-                value = 'price_low_to_high';
-                break;
-              case 'Price: High to Low':
-                value = 'price_high_to_low';
-                break;
-              case 'Year: Newest First':
-                value = 'year_new_to_old';
-                break;
-              case 'Year: Oldest First':
-                value = 'year_old_to_new';
-                break;
-              case 'KM: Low to High':
-                value = 'km_low_to_high';
-                break;
-              case 'Newest First':
-                value = 'newest_first';
-                break;
-              case 'Area: Large to Small':
-                value = 'area_large_to_small';
-                break;
-              case 'Bedrooms: High to Low':
-                value = 'bedrooms_high_to_low';
-                break;
-              default:
-                value = option;
-            }
-            return DropdownMenuItem(
-              value: value,
-              child: Text(option),
-            );
-          }).toList(),
+          items:
+              sortOptions.map((option) {
+                String value;
+                switch (option) {
+                  case 'Price: Low to High':
+                    value = 'price_low_to_high';
+                    break;
+                  case 'Price: High to Low':
+                    value = 'price_high_to_low';
+                    break;
+                  case 'Year: Newest First':
+                    value = 'year_new_to_old';
+                    break;
+                  case 'Year: Oldest First':
+                    value = 'year_old_to_new';
+                    break;
+                  case 'KM: Low to High':
+                    value = 'km_low_to_high';
+                    break;
+                  case 'Newest First':
+                    value = 'newest_first';
+                    break;
+                  case 'Area: Large to Small':
+                    value = 'area_large_to_small';
+                    break;
+                  case 'Bedrooms: High to Low':
+                    value = 'bedrooms_high_to_low';
+                    break;
+                  default:
+                    value = option;
+                }
+                return DropdownMenuItem(value: value, child: Text(option));
+              }).toList(),
           onChanged: (value) {
             setState(() {
               _sortBy = value;
@@ -534,12 +545,13 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
                       ),
                     ),
                     hint: const Text('Any'),
-                    items: _fuelTypes.map((fuelType) {
-                      return DropdownMenuItem(
-                        value: fuelType,
-                        child: Text(fuelType),
-                      );
-                    }).toList(),
+                    items:
+                        _fuelTypes.map((fuelType) {
+                          return DropdownMenuItem(
+                            value: fuelType,
+                            child: Text(fuelType),
+                          );
+                        }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedFuelType = value == 'All' ? null : value;
@@ -574,12 +586,13 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
                       ),
                     ),
                     hint: const Text('Any'),
-                    items: _transmissions.map((transmission) {
-                      return DropdownMenuItem(
-                        value: transmission,
-                        child: Text(transmission),
-                      );
-                    }).toList(),
+                    items:
+                        _transmissions.map((transmission) {
+                          return DropdownMenuItem(
+                            value: transmission,
+                            child: Text(transmission),
+                          );
+                        }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedTransmission = value == 'All' ? null : value;
@@ -729,12 +742,13 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
                         ),
                       ),
                       hint: const Text('Any Type'),
-                      items: _propertyTypes.map((type) {
-                        return DropdownMenuItem(
-                          value: type,
-                          child: Text(type),
-                        );
-                      }).toList(),
+                      items:
+                          _propertyTypes.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(type),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         setState(() {
                           _selectedPropertyType = value == 'All' ? null : value;
@@ -771,12 +785,13 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
                         ),
                       ),
                       hint: const Text('Any'),
-                      items: _furnishingTypes.map((furnishing) {
-                        return DropdownMenuItem(
-                          value: furnishing,
-                          child: Text(furnishing),
-                        );
-                      }).toList(),
+                      items:
+                          _furnishingTypes.map((furnishing) {
+                            return DropdownMenuItem(
+                              value: furnishing,
+                              child: Text(furnishing),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         setState(() {
                           _selectedFurnishing = value == 'All' ? null : value;
@@ -792,7 +807,7 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
           ],
         ),
         const SizedBox(height: 16),
-        
+
         // Bedrooms and Bathrooms Row
         Row(
           children: [
@@ -912,7 +927,7 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
           ],
         ),
         const SizedBox(height: 16),
-        
+
         // Area Range
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -969,7 +984,7 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
           ],
         ),
         const SizedBox(height: 16),
-        
+
         // Featured Properties Toggle
         CheckboxListTile(
           title: const Text('Featured Properties Only'),
@@ -988,11 +1003,6 @@ class _SearchAndFilterWidgetState extends State<SearchAndFilterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildSearchBar(),
-        _buildFiltersSection(),
-      ],
-    );
+    return Column(children: [_buildSearchBar(), _buildFiltersSection()]);
   }
 }
