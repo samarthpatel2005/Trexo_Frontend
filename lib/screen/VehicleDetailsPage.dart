@@ -4,6 +4,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:trexo/services/liked_vehicles_service.dart';
+import 'package:trexo/services/user_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VehicleDetailsPage extends StatefulWidget {
   final Map<String, dynamic> vehicle;
@@ -23,6 +25,11 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
   late Animation<Offset> _slideAnimation;
   bool _isFavorite = false;
   final LikedVehiclesService _likedService = LikedVehiclesService();
+  final UserService _userService = UserService();
+  
+  // Owner details
+  Map<String, dynamic>? _ownerDetails;
+  bool _isLoadingOwner = true;
 
   // EMI Calculator variables
   double _loanAmount = 0;
@@ -60,10 +67,68 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
 
     // Initialize EMI calculation
     _initializeEMICalculation();
+    
+    // Fetch owner details
+    _fetchOwnerDetails();
 
     // Start animations
     _fadeController.forward();
     _slideController.forward();
+  }
+  
+  Future<void> _fetchOwnerDetails() async {
+    setState(() {
+      _isLoadingOwner = true;
+    });
+    
+    try {
+      print('Vehicle data: ${widget.vehicle}');
+      
+      // Check if createdBy is already populated with user data (object)
+      final createdBy = widget.vehicle['createdBy'];
+      
+      if (createdBy != null) {
+        // If createdBy is a Map (populated user object), use it directly
+        if (createdBy is Map<String, dynamic>) {
+          print('createdBy is already populated: $createdBy');
+          setState(() {
+            _ownerDetails = createdBy;
+            _isLoadingOwner = false;
+          });
+          return;
+        }
+        
+        // If createdBy is a String (user ID), fetch from API
+        if (createdBy is String && createdBy.isNotEmpty) {
+          print('Fetching user with ID: $createdBy');
+          final userDetails = await _userService.getUserById(createdBy);
+          print('Fetched user details: $userDetails');
+          setState(() {
+            _ownerDetails = userDetails;
+            _isLoadingOwner = false;
+          });
+          return;
+        }
+      }
+      
+      // Check if createdByUser field exists
+      if (widget.vehicle['createdByUser'] != null) {
+        setState(() {
+          _ownerDetails = widget.vehicle['createdByUser'];
+          _isLoadingOwner = false;
+        });
+        return;
+      }
+      
+      setState(() {
+        _isLoadingOwner = false;
+      });
+    } catch (e) {
+      print('Error fetching owner details: $e');
+      setState(() {
+        _isLoadingOwner = false;
+      });
+    }
   }
 
   void _initializeEMICalculation() {
@@ -71,6 +136,52 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
     _downPayment = vehiclePrice * 0.2; // 20% down payment
     _loanAmount = vehiclePrice - _downPayment;
     _calculateEMI();
+  }
+  
+  Future<void> _openWhatsApp() async {
+    if (_ownerDetails == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Owner details not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    String phone = _ownerDetails!['phone']?.toString() ?? '';
+    
+    // Remove any non-digit characters
+    phone = phone.replaceAll(RegExp(r'[^\d]'), '');
+    
+    // Add country code if not present (assuming India +91)
+    if (phone.length == 10) {
+      phone = '91$phone';
+    }
+    
+    final vehicleName = widget.vehicle['name'] ?? 'Vehicle';
+    final vehicleModel = widget.vehicle['model'] ?? '';
+    final message = Uri.encodeComponent(
+      'Hi, I am interested in your $vehicleName $vehicleModel listed on Trexo.'
+    );
+    
+    final whatsappUrl = 'https://wa.me/$phone?text=$message';
+    
+    try {
+      final uri = Uri.parse(whatsappUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch WhatsApp';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not open WhatsApp: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _calculateEMI() {
@@ -287,6 +398,7 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
                       children: [
                         _buildImageCarousel(),
                         _buildMainInfoCard(),
+                        _buildOwnerDetailsCard(),
                         _buildPriceSection(context),
                         _buildSpecsGrid(),
                         _buildOverviewSection(),
@@ -398,6 +510,186 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
       borderRadius: BorderRadius.circular(2),
     ),
   );
+
+  Widget _buildOwnerDetailsCard() {
+    if (_isLoadingOwner) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_ownerDetails == null) {
+      return const SizedBox.shrink();
+    }
+
+    final ownerName = _ownerDetails!['name'] ?? 'N/A';
+    final ownerPhone = _ownerDetails!['phone'] ?? 'N/A';
+    final ownerEmail = _ownerDetails!['email'] ?? 'N/A';
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.person,
+                  color: Colors.blue[600],
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Owner Details',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.verified,
+                      color: Colors.green[600],
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Verified',
+                      style: TextStyle(
+                        color: Colors.green[600],
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildOwnerDetailRow(Icons.person_outline, 'Name', ownerName),
+          const SizedBox(height: 12),
+          _buildOwnerDetailRow(Icons.phone_outlined, 'Phone', ownerPhone),
+          const SizedBox(height: 12),
+          _buildOwnerDetailRow(Icons.email_outlined, 'Email', ownerEmail),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+              ),
+              icon: const Icon(Icons.chat, size: 20),
+              label: const Text(
+                'Contact on WhatsApp',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: _openWhatsApp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOwnerDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: Colors.grey[700]),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildPriceSection(BuildContext context) {
     return Container(
@@ -933,7 +1225,7 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage>
                     fontSize: 16,
                   ),
                 ),
-                onPressed: () {},
+                onPressed: _openWhatsApp,
               ),
             ),
           ),

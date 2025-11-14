@@ -32,6 +32,7 @@ class Vehicle {
   final String? suspension;
   final bool? insurance;
   final String createdBy;
+  final Map<String, dynamic>? createdByUser; // Owner details
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -69,6 +70,7 @@ class Vehicle {
     this.suspension,
     this.insurance,
     required this.createdBy,
+    this.createdByUser,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -108,6 +110,7 @@ class Vehicle {
       suspension: json['suspension'],
       insurance: json['insurance'],
       createdBy: json['createdBy'] ?? '',
+      createdByUser: json['createdByUser'],
       createdAt: DateTime.parse(
         json['createdAt'] ?? DateTime.now().toIso8601String(),
       ),
@@ -152,6 +155,7 @@ class Vehicle {
       'suspension': suspension,
       'insurance': insurance,
       'createdBy': createdBy,
+      'createdByUser': createdByUser,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
